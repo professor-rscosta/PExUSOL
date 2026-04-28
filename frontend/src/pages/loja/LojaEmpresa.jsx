@@ -76,7 +76,7 @@ export default function LojaEmpresa() {
             </Link>
             <div className="flex items-start gap-4">
               {empresa.logo ? (
-                <img src={empresa.logo} alt={empresa.nome} className="w-16 h-16 rounded-2xl object-cover" />
+                <img src={getImagemUrl(empresa.logo)} alt={empresa.nome} className="w-16 h-16 rounded-2xl object-cover" />
               ) : (
                 <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
                   🏪
