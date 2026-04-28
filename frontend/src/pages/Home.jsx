@@ -384,20 +384,35 @@ export default function Home() {
       </section>
 
       {/* ── FOOTER ────────────────────────────────────────────── */}
-      <footer className="bg-gray-900 text-gray-400 py-10">
-        <div className="max-w-4xl mx-auto px-4 text-center space-y-3">
-          <div className="flex justify-center mb-4">
-            <img src="/logos/usina_sol.jpeg" alt="Usina do Sol"
-              className="w-12 h-12 rounded-full object-cover opacity-80" />
-          </div>
-          <p className="text-base font-semibold text-gray-200">Projeto Usina do Sol</p>
-          <p className="text-sm">Universidade do Estado da Bahia — UNEB · DCHT · Território Velho Chico</p>
-          <p className="text-xs">🌞 Tecnologia a serviço da economia solidária e da cultura popular</p>
-          <div className="pt-4 border-t border-gray-700">
+      <footer className="bg-gray-900 text-gray-400 py-12">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-gray-700">
+            {/* Logo + título */}
+            <div className="flex items-center gap-3">
+              <img src="/logos/usina_sol.jpeg" alt="Usina do Sol"
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-yellow-400/40"/>
+              <div>
+                <p className="text-white font-bold">Projeto Usina do Sol</p>
+                <p className="text-gray-500 text-xs">UNEB · DCHT · Território Velho Chico</p>
+              </div>
+            </div>
+
+            {/* Botão painel — canto direito do footer */}
             <Link to="/login"
-              className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-yellow-400 transition-colors">
-              <Lock className="w-3 h-3" /> Acesso ao Painel Administrativo
+              className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold text-sm px-5 py-2.5 rounded-full transition-all shadow-lg">
+              <Lock className="w-4 h-4" />
+              Acessar Painel Administrativo
             </Link>
+          </div>
+
+          <div className="pt-6 text-center space-y-1.5">
+            <p className="text-xs text-gray-500">🌞 Tecnologia a serviço da economia solidária e da cultura popular</p>
+            <p className="text-sm font-semibold text-gray-300">
+              © 2026 Prof. Me. Ramon Santos Costa. Todos os direitos reservados.
+            </p>
+            <p className="text-xs text-gray-600">
+              Universidade do Estado da Bahia — UNEB · Projeto de Extensão Usina do Sol
+            </p>
           </div>
         </div>
       </footer>
