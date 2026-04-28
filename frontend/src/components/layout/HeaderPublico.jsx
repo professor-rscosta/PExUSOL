@@ -1,4 +1,3 @@
-// src/components/layout/HeaderPublico.jsx
 import { Link, useLocation } from 'react-router-dom'
 import { ShoppingCart, ShoppingBag, Info, Lock, LayoutDashboard } from 'lucide-react'
 import { useCarrinho } from '../../contexts/CarrinhoContext'
@@ -15,7 +14,6 @@ export default function HeaderPublico() {
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
-        {/* ── Logo ──────────────────────────────────────── */}
         <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
           <img src="/logos/usina_sol.jpeg" alt="Usina do Sol"
             className="w-10 h-10 rounded-full object-cover ring-2 ring-yellow-400 shadow"/>
@@ -25,7 +23,6 @@ export default function HeaderPublico() {
           </div>
         </Link>
 
-        {/* ── Nav central ───────────────────────────────── */}
         <nav className="hidden md:flex items-center gap-1">
           <a href={anchor('#associacoes')}
             className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors">
@@ -41,10 +38,7 @@ export default function HeaderPublico() {
           </a>
         </nav>
 
-        {/* ── Ações direita ─────────────────────────────── */}
         <div className="flex items-center gap-2 flex-shrink-0">
-
-          {/* Carrinho */}
           <Link to="/carrinho"
             className="relative flex items-center gap-2 bg-amber-50 hover:bg-amber-100 rounded-xl px-3 py-2 transition-colors">
             <ShoppingCart className="w-5 h-5 text-amber-700"/>
@@ -58,17 +52,14 @@ export default function HeaderPublico() {
             </span>
           </Link>
 
-          {/* Área Reservada — sempre visível no canto superior direito */}
           {usuario ? (
-            <Link
-              to={usuario.role === 'ADMIN' ? '/admin' : '/vendedor'}
+            <Link to={usuario.role === 'ADMIN' ? '/admin' : '/vendedor'}
               className="flex items-center gap-2 bg-[#1a2f7a] hover:bg-[#0f1f5c] text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
               <LayoutDashboard className="w-4 h-4"/>
               <span className="hidden sm:block">Painel</span>
             </Link>
           ) : (
-            <Link
-              to="/login"
+            <Link to="/login"
               className="flex items-center gap-2 bg-[#1a2f7a] hover:bg-[#0f1f5c] text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
               <Lock className="w-4 h-4"/>
               <span className="hidden sm:block">Área Reservada</span>
@@ -77,7 +68,6 @@ export default function HeaderPublico() {
         </div>
       </div>
 
-      {/* ── Menu mobile ───────────────────────────────────── */}
       <div className="md:hidden border-t border-gray-100 bg-white px-4 py-2 flex gap-4 overflow-x-auto text-xs">
         <a href={anchor('#associacoes')} className="flex items-center gap-1 text-gray-600 whitespace-nowrap">🏘️ Associações</a>
         <a href={anchor('#como-comprar')} className="flex items-center gap-1 text-gray-600 whitespace-nowrap">🛒 Como Comprar</a>
