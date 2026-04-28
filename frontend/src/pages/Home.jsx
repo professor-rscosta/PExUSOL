@@ -1,7 +1,7 @@
 // src/pages/Home.jsx
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ExternalLink, ShoppingBag, Wrench, Sparkles, ArrowRight, MapPin, Lock, BookOpen, Users, Target, Handshake } from 'lucide-react';
+import { ExternalLink, ShoppingBag, Wrench, Sparkles, ArrowRight, MapPin, BookOpen, Users, Target, Handshake } from 'lucide-react';
 import api from '../api/axios';
 
 const ASSOCIACOES = [
@@ -386,8 +386,7 @@ export default function Home() {
       {/* ── FOOTER ────────────────────────────────────────────── */}
       <footer className="bg-gray-900 text-gray-400 py-12">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-gray-700">
-            {/* Logo + título */}
+          <div className="flex justify-center pb-8 border-b border-gray-700">
             <div className="flex items-center gap-3">
               <img src="/logos/usina_sol.jpeg" alt="Usina do Sol"
                 className="w-12 h-12 rounded-full object-cover ring-2 ring-yellow-400/40"/>
@@ -396,13 +395,6 @@ export default function Home() {
                 <p className="text-gray-500 text-xs">UNEB · DCHT · Território Velho Chico</p>
               </div>
             </div>
-
-            {/* Botão painel — canto direito do footer */}
-            <Link to="/login"
-              className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold text-sm px-5 py-2.5 rounded-full transition-all shadow-lg">
-              <Lock className="w-4 h-4" />
-              Acessar Painel Administrativo
-            </Link>
           </div>
 
           <div className="pt-6 text-center space-y-1.5">
