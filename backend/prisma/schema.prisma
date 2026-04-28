@@ -22,6 +22,9 @@ model Usuario {
   senha     String    @db.VarChar(255)
   role      Role      @default(VENDEDOR)
   ativo     Boolean   @default(true)
+  cpf       String?   @unique @db.VarChar(14)
+  telefone  String?   @db.VarChar(20)
+  endereco  Endereco?
   empresaId Int?
   empresa   Empresa?  @relation(fields: [empresaId], references: [id], onDelete: SetNull)
   createdAt DateTime  @default(now())
@@ -146,4 +149,24 @@ model ItemPedido {
   preco      Decimal @db.Decimal(10, 2)
 
   @@map("itens_pedido")
+}
+
+// ─────────────────────────────────────
+// ENDEREÇOS DOS USUÁRIOS
+// ─────────────────────────────────────
+model Endereco {
+  id          Int      @id @default(autoincrement())
+  usuarioId   Int      @unique
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  logradouro  String   @db.VarChar(200)
+  numero      String   @db.VarChar(20)
+  complemento String?  @db.VarChar(100)
+  bairro      String   @db.VarChar(100)
+  cep         String   @db.VarChar(9)
+  cidade      String   @db.VarChar(100)
+  estado      String   @db.Char(2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("enderecos")
 }

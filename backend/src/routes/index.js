@@ -17,6 +17,7 @@ const categoriaCtrl = require('../controllers/categoriaController');
 // ═══════════════════════════════════════════════════════
 router.post('/auth/login', authCtrl.login);
 router.get('/auth/perfil', autenticar, authCtrl.perfil);
+router.put('/auth/perfil', autenticar, authCtrl.atualizarPerfil);
 router.put('/auth/senha', autenticar, authCtrl.alterarSenha);
 
 // ═══════════════════════════════════════════════════════
@@ -27,8 +28,8 @@ router.get('/empresas/:slug', empresaCtrl.buscarPorSlug);
 
 // EMPRESAS (PROTEGIDO)
 router.get('/admin/empresas', autenticar, apenasAdmin, empresaCtrl.listarAdmin);
-router.post('/admin/empresas', autenticar, apenasAdmin, empresaCtrl.criar);
-router.put('/admin/empresas/:id', autenticar, upload.single('logo'), empresaCtrl.atualizar);
+router.post('/admin/empresas', autenticar, apenasAdmin, upload.single('logo'), empresaCtrl.criar);
+router.put('/admin/empresas/:id', autenticar, apenasAdmin, upload.single('logo'), empresaCtrl.atualizar);
 router.delete('/admin/empresas/:id', autenticar, apenasAdmin, empresaCtrl.excluir);
 
 // Dashboard por empresa (vendedor/admin)

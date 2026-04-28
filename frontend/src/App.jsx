@@ -29,6 +29,7 @@ import VendedorDashboard from './pages/vendedor/Dashboard'
 import VendedorProdutos from './pages/vendedor/Produtos'
 import VendedorPedidos from './pages/vendedor/Pedidos'
 import VendedorRelatorio from './pages/vendedor/Relatorio'
+import Perfil from './pages/Perfil'
 
 // Rota protegida
 function RotaProtegida({ children, roles }) {
@@ -76,6 +77,7 @@ export default function App() {
               <Route path="produtos" element={<AdminProdutos />} />
               <Route path="pedidos" element={<AdminPedidos />} />
               <Route path="categorias" element={<AdminCategorias />} />
+              <Route path="perfil" element={<Perfil />} />
             </Route>
 
             {/* VENDEDOR */}
@@ -91,6 +93,7 @@ export default function App() {
               <Route path="produtos" element={<VendedorProdutos />} />
               <Route path="pedidos" element={<VendedorPedidos />} />
               <Route path="relatorio" element={<VendedorRelatorio />} />
+              <Route path="perfil" element={<Perfil />} />
             </Route>
 
             {/* 404 */}

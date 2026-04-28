@@ -1,14 +1,15 @@
 // src/components/layout/VendedorLayout.jsx
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Sun, LayoutDashboard, Package, ShoppingBag, BarChart2, LogOut, Menu, X, ExternalLink } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, BarChart2, LogOut, Menu, X, ExternalLink, User } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 
 const navItems = [
-  { to: '/vendedor', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/vendedor/produtos', label: 'Produtos', icon: Package },
-  { to: '/vendedor/pedidos', label: 'Pedidos', icon: ShoppingBag },
-  { to: '/vendedor/relatorio', label: 'Relatório', icon: BarChart2 },
+  { to: '/vendedor',           label: 'Dashboard',  icon: LayoutDashboard, end: true },
+  { to: '/vendedor/produtos',  label: 'Produtos',   icon: Package },
+  { to: '/vendedor/pedidos',   label: 'Pedidos',    icon: ShoppingBag },
+  { to: '/vendedor/relatorio', label: 'Relatório',  icon: BarChart2 },
+  { to: '/vendedor/perfil',    label: 'Meu Perfil', icon: User },
 ]
 
 export default function VendedorLayout() {
@@ -17,111 +18,134 @@ export default function VendedorLayout() {
   const [menuAberto, setMenuAberto] = useState(false)
 
   const handleLogout = () => { logout(); navigate('/login') }
-
   const lojaUrl = usuario?.empresa?.slug ? `/empresa/${usuario.empresa.slug}` : '/'
+  const logoEmpresa = usuario?.empresa?.logo
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <aside className="hidden md:flex w-64 bg-white border-r border-gray-100 flex-col">
-        <div className="p-5 border-b border-gray-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-sol-400 to-terra-500 rounded-xl flex items-center justify-center">
-              <Sun className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <div className="text-gray-800 font-bold text-sm">Usina do Sol</div>
-              <div className="text-gray-400 text-xs">{usuario?.empresa?.nome || 'Vendedor'}</div>
+    <div className="min-h-screen flex" style={{ background: '#f0f4ff' }}>
+
+      {/* ── Sidebar Desktop ──────────────────────────────── */}
+      <aside className="hidden md:flex w-64 flex-col shadow-xl"
+        style={{ background: 'linear-gradient(180deg, #0f1f5c 0%, #1a2f7a 60%, #1e40af 100%)' }}>
+
+        {/* Logo / Empresa */}
+        <div className="p-5 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            {logoEmpresa ? (
+              <img src={logoEmpresa.startsWith('logos/') ? `/${logoEmpresa}` : `/uploads/${logoEmpresa}`}
+                alt={usuario?.empresa?.nome}
+                className="w-11 h-11 rounded-xl object-cover ring-2 ring-yellow-400/60 bg-white p-0.5"/>
+            ) : (
+              <div className="w-11 h-11 rounded-xl bg-yellow-400 flex items-center justify-center text-[#0f1f5c] font-black text-lg">
+                {usuario?.empresa?.nome?.[0] || 'U'}
+              </div>
+            )}
+            <div className="min-w-0">
+              <div className="text-white font-bold text-sm truncate">
+                {usuario?.empresa?.nome?.split('–')[0].trim().split(' ').slice(0,3).join(' ') || 'Vendedor'}
+              </div>
+              <div className="text-blue-300 text-xs">Painel do Vendedor</div>
             </div>
           </div>
         </div>
 
+        {/* Nav */}
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
+            <NavLink key={to} to={to} end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-sol-50 text-sol-700 border border-sol-200'
-                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
+                    ? 'bg-yellow-400 text-[#0f1f5c] shadow-md'
+                    : 'text-blue-200 hover:text-white hover:bg-white/10'
                 }`
-              }
-            >
-              <Icon className="w-5 h-5" />
+              }>
+              <Icon className="w-5 h-5 flex-shrink-0"/>
               {label}
             </NavLink>
           ))}
 
-          <a
-            href={lojaUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-50"
-          >
-            <ExternalLink className="w-5 h-5" />
+          <a href={lojaUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-blue-200 hover:text-white hover:bg-white/10 transition-all mt-1">
+            <ExternalLink className="w-5 h-5"/>
             Ver minha loja
           </a>
         </nav>
 
-        <div className="p-4 border-t border-gray-100">
+        {/* Usuário + Logout */}
+        <div className="p-4 border-t border-white/10">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 bg-sol-100 rounded-xl flex items-center justify-center text-sol-700 text-sm font-bold">
-              {usuario?.nome?.[0]}
+            <div className="w-9 h-9 rounded-xl bg-yellow-400/20 flex items-center justify-center text-yellow-300 font-bold text-sm border border-yellow-400/30">
+              {usuario?.nome?.[0]?.toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-gray-800 text-sm font-medium truncate">{usuario?.nome}</p>
-              <p className="text-gray-400 text-xs">Vendedor</p>
+              <p className="text-white text-sm font-medium truncate">{usuario?.nome}</p>
+              <p className="text-blue-300 text-xs">Vendedor</p>
             </div>
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-2 text-gray-400 hover:text-red-500 text-sm transition-colors">
-            <LogOut className="w-4 h-4" />
-            Sair
+          <button onClick={handleLogout}
+            className="flex items-center gap-2 text-blue-300 hover:text-red-400 text-sm transition-colors w-full hover:bg-white/5 px-2 py-1.5 rounded-lg">
+            <LogOut className="w-4 h-4"/>
+            Sair do sistema
           </button>
         </div>
       </aside>
 
-      {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-100 px-4 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sun className="w-5 h-5 text-sol-500" />
-          <span className="text-gray-800 font-bold text-sm">Painel Vendedor</span>
+      {/* ── Mobile Header ─────────────────────────────────── */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 px-4 h-14 flex items-center justify-between shadow-md"
+        style={{ background: '#0f1f5c' }}>
+        <div className="flex items-center gap-2.5">
+          {logoEmpresa ? (
+            <img src={logoEmpresa.startsWith('logos/') ? `/${logoEmpresa}` : `/uploads/${logoEmpresa}`}
+              alt="" className="w-8 h-8 rounded-lg object-cover bg-white p-0.5"/>
+          ) : (
+            <div className="w-8 h-8 rounded-lg bg-yellow-400 flex items-center justify-center text-[#0f1f5c] font-black text-sm">
+              {usuario?.empresa?.nome?.[0] || 'U'}
+            </div>
+          )}
+          <span className="text-white font-bold text-sm">
+            {usuario?.empresa?.nome?.split(' ').slice(0,2).join(' ') || 'Vendedor'}
+          </span>
         </div>
-        <button onClick={() => setMenuAberto(!menuAberto)} className="text-gray-600">
-          {menuAberto ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        <button onClick={() => setMenuAberto(!menuAberto)} className="text-white p-1">
+          {menuAberto ? <X className="w-6 h-6"/> : <Menu className="w-6 h-6"/>}
         </button>
       </div>
 
+      {/* Mobile menu overlay */}
       {menuAberto && (
-        <div className="md:hidden fixed inset-0 z-30 bg-white pt-14">
+        <div className="md:hidden fixed inset-0 z-30 pt-14"
+          style={{ background: 'linear-gradient(180deg, #0f1f5c 0%, #1e40af 100%)' }}>
           <nav className="p-4 space-y-1">
             {navItems.map(({ to, label, icon: Icon, end }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={end}
+              <NavLink key={to} to={to} end={end}
                 onClick={() => setMenuAberto(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium ${
-                    isActive ? 'bg-sol-50 text-sol-700' : 'text-gray-600'
+                  `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium ${
+                    isActive ? 'bg-yellow-400 text-[#0f1f5c]' : 'text-blue-200'
                   }`
-                }
-              >
-                <Icon className="w-5 h-5" />
-                {label}
+                }>
+                <Icon className="w-5 h-5"/>{label}
               </NavLink>
             ))}
-            <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-3 text-red-400 text-sm w-full">
-              <LogOut className="w-5 h-5" /> Sair
+            <a href={lojaUrl} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-3 text-blue-200 text-sm rounded-xl">
+              <ExternalLink className="w-5 h-5"/> Ver loja
+            </a>
+            <button onClick={handleLogout}
+              className="flex items-center gap-3 px-4 py-3 text-red-400 text-sm w-full rounded-xl">
+              <LogOut className="w-5 h-5"/> Sair
             </button>
           </nav>
         </div>
       )}
 
-      <main className="flex-1 md:overflow-auto">
-        <div className="md:hidden h-14" />
-        <Outlet />
+      {/* ── Main Content ──────────────────────────────────── */}
+      <main className="flex-1 overflow-auto">
+        <div className="md:hidden h-14"/>
+        <div className="p-6">
+          <Outlet/>
+        </div>
       </main>
     </div>
   )

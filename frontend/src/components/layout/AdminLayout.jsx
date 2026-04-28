@@ -2,7 +2,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   Sun, LayoutDashboard, Building2, Users, Package,
-  ShoppingBag, Tag, LogOut, Menu, X
+  ShoppingBag, Tag, LogOut, Menu, X, User
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'

@@ -48,27 +48,18 @@ const buscarPorSlug = async (req, res) => {
 
 // ─── CRIAR ────────────────────────────────────────────────
 const criar = async (req, res) => {
-  const { nome, slug, descricao, whatsapp, endereco, cidade } = req.body;
+  const { nome, slug, descricao, whatsapp, site, endereco, cidade } = req.body;
 
   if (!nome || !slug || !whatsapp) {
     return res.status(400).json({ erro: 'Nome, slug e WhatsApp são obrigatórios' });
   }
 
-  // Normaliza slug
-  const slugNormalizado = slug
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
+  const slugNormalizado = slug.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+  const logo = req.file ? `uploads/produtos/${req.file.filename}` : null;
 
   const empresa = await prisma.empresa.create({
-    data: {
-      nome,
-      slug: slugNormalizado,
-      descricao,
-      whatsapp: whatsapp.replace(/\D/g, ''),
-      endereco,
-      cidade,
-    },
+    data: { nome, slug: slugNormalizado, descricao, whatsapp: whatsapp.replace(/\D/g, ''), site: site || null, endereco, cidade, logo },
   });
 
   res.status(201).json(empresa);
@@ -90,7 +81,7 @@ const atualizar = async (req, res) => {
   // Upload de logo
   let logo = empresa.logo;
   if (req.file) {
-    logo = `/uploads/produtos/${req.file.filename}`;
+    logo = `uploads/produtos/${req.file.filename}`;
     // Remove logo anterior
     if (empresa.logo) {
       const oldPath = path.join(__dirname, '..', '..', empresa.logo);
@@ -104,6 +95,7 @@ const atualizar = async (req, res) => {
       nome: nome || empresa.nome,
       descricao: descricao !== undefined ? descricao : empresa.descricao,
       whatsapp: whatsapp ? whatsapp.replace(/\D/g, '') : empresa.whatsapp,
+      site: req.body.site !== undefined ? req.body.site : empresa.site,
       endereco: endereco !== undefined ? endereco : empresa.endereco,
       cidade: cidade !== undefined ? cidade : empresa.cidade,
       logo,
