@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Package, ShoppingBag, BarChart2, LogOut, Menu, X, ExternalLink, User } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { getImagemUrl } from '../../utils'
 
 const navItems = [
   { to: '/vendedor',           label: 'Dashboard',  icon: LayoutDashboard, end: true },
@@ -32,7 +33,7 @@ export default function VendedorLayout() {
         <div className="p-5 border-b border-white/10">
           <div className="flex items-center gap-3">
             {logoEmpresa ? (
-              <img src={logoEmpresa.startsWith('logos/') ? `/${logoEmpresa}` : `/uploads/${logoEmpresa}`}
+              <img src={getImagemUrl(logoEmpresa)}
                 alt={usuario?.empresa?.nome}
                 className="w-11 h-11 rounded-xl object-cover ring-2 ring-yellow-400/60 bg-white p-0.5"/>
             ) : (
@@ -96,7 +97,7 @@ export default function VendedorLayout() {
         style={{ background: '#0f1f5c' }}>
         <div className="flex items-center gap-2.5">
           {logoEmpresa ? (
-            <img src={logoEmpresa.startsWith('logos/') ? `/${logoEmpresa}` : `/uploads/${logoEmpresa}`}
+            <img src={getImagemUrl(logoEmpresa)}
               alt="" className="w-8 h-8 rounded-lg object-cover bg-white p-0.5"/>
           ) : (
             <div className="w-8 h-8 rounded-lg bg-yellow-400 flex items-center justify-center text-[#0f1f5c] font-black text-sm">

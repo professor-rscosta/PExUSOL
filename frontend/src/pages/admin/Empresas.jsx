@@ -43,7 +43,7 @@ export default function AdminEmpresas() {
   const abrirEditar = (emp) => {
     setEditando(emp.id)
     setForm({ nome: emp.nome, slug: emp.slug, descricao: emp.descricao||'', whatsapp: emp.whatsapp, site: emp.site||'', endereco: emp.endereco||'', cidade: emp.cidade||'' })
-    setPreviewLogo(emp.logo ? (emp.logo.startsWith('logos/') ? `/${emp.logo}` : getImagemUrl(emp.logo)) : null)
+    setPreviewLogo(emp.logo ? getImagemUrl(emp.logo) : null)
     setLogo(null)
     setModal(true)
   }
@@ -71,7 +71,7 @@ export default function AdminEmpresas() {
       ) : (
         <div className="grid sm:grid-cols-2 gap-5">
           {empresas.map((emp) => {
-            const logoSrc = emp.logo ? (emp.logo.startsWith('logos/') ? `/${emp.logo}` : getImagemUrl(emp.logo)) : null
+            const logoSrc = emp.logo ? getImagemUrl(emp.logo) : null
             return (
               <div key={emp.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
                 {/* Cabeçalho colorido */}
