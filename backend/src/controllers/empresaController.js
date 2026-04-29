@@ -31,7 +31,7 @@ const buscarPorSlug = async (req, res) => {
 const criar = async (req, res) => {
   const { nome, slug, descricao, whatsapp, site, endereco, cidade } = req.body;
   if (!nome||!slug||!whatsapp) return res.status(400).json({ erro: 'Nome, slug e WhatsApp obrigatórios' });
-  const logo = req.file ? `uploads/produtos/${req.file.filename}` : null;
+  const logo = req.file ? `empresas/${req.file.filename}` : null;
   const [r] = await db.query(
     'INSERT INTO empresas (nome,slug,descricao,whatsapp,site,logo,endereco,cidade) VALUES (?,?,?,?,?,?,?,?)',
     [nome, slug.toLowerCase().replace(/[^a-z0-9-]/g,'-'), descricao||null, whatsapp.replace(/\D/g,''), site||null, logo, endereco||null, cidade||null]
@@ -45,7 +45,7 @@ const atualizar = async (req, res) => {
   const { nome, descricao, whatsapp, site, endereco, cidade, ativo } = req.body;
   const [ex] = await db.query('SELECT * FROM empresas WHERE id=?', [id]);
   if (!ex[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
-  const logo = req.file ? `uploads/produtos/${req.file.filename}` : ex[0].logo;
+  const logo = req.file ? `empresas/${req.file.filename}` : ex[0].logo;
   await db.query(
     'UPDATE empresas SET nome=?,descricao=?,whatsapp=?,site=?,logo=?,endereco=?,cidade=?,ativo=? WHERE id=?',
     [nome||ex[0].nome, descricao!==undefined?descricao:ex[0].descricao, whatsapp?whatsapp.replace(/\D/g,''):ex[0].whatsapp, site!==undefined?site:ex[0].site, logo, endereco!==undefined?endereco:ex[0].endereco, cidade!==undefined?cidade:ex[0].cidade, ativo!==undefined?(ativo==='false'||ativo===false?0:1):ex[0].ativo, id]

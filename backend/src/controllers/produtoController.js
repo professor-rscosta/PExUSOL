@@ -45,7 +45,7 @@ const buscarPorId = async (req, res) => {
 const criar = async (req, res) => {
   const { nome, descricao, preco, estoque, unidade, categoriaId, empresaId, ativo } = req.body;
   if (!nome||!preco||!empresaId) return res.status(400).json({ erro: 'Nome, preço e empresa obrigatórios' });
-  const imagem = req.file ? req.file.filename : null;
+  const imagem = req.file ? `produtos/${req.file.filename}` : null;
   const [r] = await db.query(
     'INSERT INTO produtos (nome,descricao,preco,estoque,unidade,categoriaId,empresaId,ativo,imagem) VALUES (?,?,?,?,?,?,?,?,?)',
     [nome, descricao||null, preco, estoque||0, unidade||'un', categoriaId||null, empresaId, ativo===false||ativo==='false'?0:1, imagem]
@@ -60,7 +60,7 @@ const atualizar = async (req, res) => {
   if (!ex[0]) return res.status(404).json({ erro: 'Produto não encontrado' });
   const p = ex[0];
   const { nome, descricao, preco, estoque, unidade, categoriaId, ativo } = req.body;
-  const imagem = req.file ? req.file.filename : p.imagem;
+  const imagem = req.file ? `produtos/${req.file.filename}` : p.imagem;
   await db.query(
     'UPDATE produtos SET nome=?,descricao=?,preco=?,estoque=?,unidade=?,categoriaId=?,ativo=?,imagem=? WHERE id=?',
     [nome||p.nome, descricao!==undefined?descricao:p.descricao, preco||p.preco, estoque!==undefined?estoque:p.estoque, unidade||p.unidade, categoriaId!==undefined?categoriaId:p.categoriaId, ativo!==undefined?(ativo===false||ativo==='false'?0:1):p.ativo, imagem, id]

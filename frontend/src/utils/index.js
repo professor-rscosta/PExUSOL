@@ -74,7 +74,8 @@ export const gerarMensagemWhatsApp = (pedido, itens, tipoEntrega, endereco, obse
 export const getImagemUrl = (imagem) => {
   if (!imagem) return null
   if (imagem.startsWith('http')) return imagem
-  // logos ficam em /public/logos/ (não em /uploads/)
+  // logos estáticas ficam em /public/logos/
   if (imagem.startsWith('logos/')) return `/${imagem}`
+  // tudo mais fica em /uploads/
   return `/uploads/${imagem}`
 }
