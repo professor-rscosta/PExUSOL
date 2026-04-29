@@ -43,28 +43,21 @@ export const gerarMensagemWhatsApp = (
   pedido, itens, tipoEntrega, endereco, observacao,
   clienteNome = '', clienteTelefone = '', empresaNome = ''
 ) => {
-  // ─────────────────────────────────────────────────────────
-  // REGRA: usar APENAS caracteres ASCII + formatacao WhatsApp
-  //   *texto*  = negrito
-  //   _texto_  = italico
-  //   Separador: tracos simples (-)
-  // ─────────────────────────────────────────────────────────
   const protocolo = pedido || ('PED-' + new Date().getFullYear() + '-XXXX')
-
   const dataHora = new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date())
 
-  const sep  = '-----------------------------'
-  const sep2 = '============================='
+  const sep  = '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'
+  const sep2 = '\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550'
 
   const listaItens = itens
-    .map(function(i) {
+    .map(function(i, idx) {
       return (
-        '   [' + (itens.indexOf(i) + 1) + '] *' + i.nome + '*\n' +
-        '       ' + i.quantidade + 'x  x  ' + formatarMoeda(i.preco) +
-        '  =  *' + formatarMoeda(i.preco * i.quantidade) + '*'
+        '   ' + (idx + 1) + '. *' + i.nome + '*\n' +
+        '       ' + i.quantidade + 'x \u00d7 ' + formatarMoeda(i.preco) +
+        ' = *' + formatarMoeda(i.preco * i.quantidade) + '*'
       )
     })
     .join('\n')
@@ -75,72 +68,52 @@ export const gerarMensagemWhatsApp = (
 
   var msg = ''
 
-  // CABECALHO
-  msg += '*USINA DO SOL*\n'
-  msg += '_Plataforma de Associacoes - UNEB_\n'
+  msg += '\uD83C\uDF1E *USINA DO SOL \u2014 NOVO PEDIDO* \uD83C\uDF1E\n'
   msg += sep2 + '\n'
-
-  // ASSOCIACAO
   if (empresaNome) {
-    msg += '*Associacao:*\n'
-    msg += '   ' + empresaNome + '\n'
+    msg += '\uD83C\uDFEA *' + empresaNome + '*\n'
     msg += sep + '\n'
   }
-
-  // CLIENTE
   msg += '\n'
-  msg += '*DADOS DO CLIENTE*\n'
-  msg += '   Nome:  *' + (clienteNome || 'Nao informado') + '*\n'
+  msg += '\uD83D\uDC64 *CLIENTE*\n'
+  msg += '   Nome: *' + (clienteNome || 'Nao informado') + '*\n'
   if (clienteTelefone) {
-    msg += '   Fone:  *' + clienteTelefone + '*\n'
+    msg += '   \uD83D\uDCF1 Tel: *' + clienteTelefone + '*\n'
   }
-
-  // PEDIDO
   msg += '\n'
-  msg += '*DADOS DO PEDIDO*\n'
-  msg += '   Protocolo: *' + protocolo + '*\n'
-  msg += '   Data/Hora: ' + dataHora + '\n'
-
-  // ITENS
+  msg += '\uD83D\uDCCB *DADOS DO PEDIDO*\n'
+  msg += '   \uD83D\uDD16 Protocolo: *' + protocolo + '*\n'
+  msg += '   \uD83D\uDCC5 Data/Hora: ' + dataHora + '\n'
   msg += '\n'
-  msg += '*ITENS DO PEDIDO*\n'
+  msg += '\uD83D\uDED2 *ITENS DO PEDIDO*\n'
   msg += sep + '\n'
   msg += listaItens + '\n'
   msg += sep + '\n'
-
-  // TOTAL
   msg += '\n'
   msg += sep2 + '\n'
-  msg += '   *TOTAL: ' + formatarMoeda(total) + '*\n'
+  msg += '\uD83D\uDCB0 *TOTAL: ' + formatarMoeda(total) + '*\n'
   msg += sep2 + '\n'
-
-  // ENTREGA
   msg += '\n'
-  msg += '*ENTREGA*\n'
+  msg += '\uD83D\uDE9A *ENTREGA*\n'
   if (tipoEntrega === 'ENTREGA') {
-    msg += '   Tipo:  Entrega no endereco\n'
+    msg += '   \uD83C\uDFE0 Entrega no endere\u00e7o\n'
     if (endereco) {
-      msg += '   Local: *' + endereco + '*\n'
+      msg += '   \uD83D\uDCCD *' + endereco + '*\n'
     }
   } else {
-    msg += '   Tipo:  Retirada na loja\n'
+    msg += '   \uD83C\uDFEA Retirada na loja\n'
   }
-
-  // OBSERVACAO
   if (observacao) {
     msg += '\n'
-    msg += '*Observacao:*\n'
-    msg += '   ' + observacao + '\n'
+    msg += '\uD83D\uDCDD *Observa\u00e7\u00e3o:* ' + observacao + '\n'
   }
-
-  // RODAPE
   msg += '\n'
-  msg += sep2 + '\n'
-  msg += '_Ola! Fiz um pedido pelo site Usina do Sol._\n'
-  msg += '_Aguardo a confirmacao. Obrigado!_'
+  msg += '_Ol\u00e1! Fiz um pedido pelo site Usina do Sol._\n'
+  msg += '_Aguardo a confirma\u00e7\u00e3o. Obrigado!_ \uD83D\uDE0A\uD83C\uDF1B'
 
   return encodeURIComponent(msg)
 }
+
 
 // Funcao auxiliar para abrir WhatsApp diretamente
 export const enviarWhatsApp = function(numero, mensagemCodificada) {
