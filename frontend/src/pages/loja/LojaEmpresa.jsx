@@ -185,11 +185,11 @@ export default function LojaEmpresa() {
 function ProdutoCard({ produto, onAdicionar, noCarrinho }) {
   return (
     <div className="card group animate-fadeIn">
-      <Link to={`/empresa/${produto.empresaId}/produto/${produto.id}`}>
+      <Link to={`/empresa/${slug}/produto/${produto.id}`}>
         <div className="aspect-square bg-gray-100 overflow-hidden">
           {produto.imagem ? (
             <img
-              src={produto.imagem}
+              src={getImagemUrl(produto.imagem)}
               alt={produto.nome}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />

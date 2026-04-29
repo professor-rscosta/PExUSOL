@@ -12,7 +12,9 @@ const listarPorEmpresa = async (req, res) => {
   if (busca) { q += ' AND p.nome LIKE ?'; params.push(`%${busca}%`); }
   q += ' ORDER BY p.nome';
   const [rows] = await db.query(q, params);
-  res.json(rows.map(r => ({...r, categoria: r.categoriaId ? {id:r.categoriaId,nome:r.categoriaNome} : null})));
+  const produtos = rows.map(r => ({...r, categoria: r.categoriaId ? {id:r.categoriaId,nome:r.categoriaNome} : null}));
+  // Retorna objeto com produtos para compatibilidade com frontend
+  res.json({ produtos, total: produtos.length });
 };
 
 const listarTodos = async (req, res) => {

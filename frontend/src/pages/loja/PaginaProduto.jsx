@@ -48,7 +48,7 @@ export default function PaginaProduto() {
         <div className="card overflow-hidden">
           <div className="aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
             {produto.imagem ? (
-              <img src={produto.imagem} alt={produto.nome} className="w-full h-full object-cover" />
+              <img src={getImagemUrl(produto.imagem)} alt={produto.nome} className="w-full h-full object-cover" />
             ) : (
               <span className="text-6xl">{produto.categoria?.icone || '📦'}</span>
             )}
