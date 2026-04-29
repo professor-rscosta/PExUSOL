@@ -1,5 +1,6 @@
+// src/components/layout/HeaderPublico.jsx
 import { Link, useLocation } from 'react-router-dom'
-import { ShoppingCart, ShoppingBag, Info, Lock, LayoutDashboard } from 'lucide-react'
+import { ShoppingCart, LogIn, ShoppingBag, Info } from 'lucide-react'
 import { useCarrinho } from '../../contexts/CarrinhoContext'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -8,78 +9,100 @@ export default function HeaderPublico() {
   const { usuario } = useAuth()
   const location = useLocation()
   const isHome = location.pathname === '/'
-  const anchor = (hash) => isHome ? hash : `/${hash}`
+
+  // Âncora inteligente: se estiver na home, usa #hash; senão, vai para home+hash
+  const anchorHref = (hash) => isHome ? hash : `/${hash}`
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
-        {/* LOGO */}
-        <Link to="/" className="flex items-center gap-2.5">
-          <img src="/logos/usina_sol.jpeg" alt="Usina do Sol"
-            className="w-10 h-10 rounded-full object-cover ring-2 ring-yellow-400"/>
-          <div>
-            <div className="font-bold text-gray-800 text-sm leading-none">Usina do Sol</div>
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
+          <img
+            src="/logos/usina_sol.jpeg"
+            alt="Usina do Sol"
+            className="w-10 h-10 rounded-full object-cover ring-2 ring-yellow-400 shadow"
+          />
+          <div className="hidden sm:block">
+            <div className="font-bold text-gray-800 leading-none text-base">Usina do Sol</div>
             <div className="text-xs text-gray-400 leading-none">UNEB · Velho Chico</div>
           </div>
         </Link>
 
-        {/* NAV - desktop */}
+        {/* Navegação central */}
         <nav className="hidden md:flex items-center gap-1">
-          <a href={anchor('#associacoes')} className="text-sm font-medium text-gray-600 hover:text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1.5">
-            <ShoppingBag className="w-4 h-4"/> Associações
+          <a
+            href={anchorHref('#associacoes')}
+            className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Associações
           </a>
-          <a href={anchor('#como-comprar')} className="text-sm font-medium text-gray-600 hover:text-amber-700 px-3 py-2 rounded-lg hover:bg-amber-50 transition-colors">
+          <a
+            href={anchorHref('#como-comprar')}
+            className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-amber-700 hover:bg-amber-50 px-3 py-2 rounded-lg transition-colors"
+          >
             🛒 Como Comprar
           </a>
-          <a href={anchor('#sobre')} className="text-sm font-medium text-gray-600 hover:text-green-700 px-3 py-2 rounded-lg hover:bg-green-50 transition-colors flex items-center gap-1.5">
-            <Info className="w-4 h-4"/> Sobre
+          <a
+            href={anchorHref('#sobre')}
+            className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-green-700 hover:bg-green-50 px-3 py-2 rounded-lg transition-colors"
+          >
+            <Info className="w-4 h-4" />
+            Sobre o Projeto
           </a>
         </nav>
 
-        {/* BOTÕES DIREITA */}
-        <div className="flex items-center gap-2">
-
+        {/* Actions */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Carrinho */}
-          <Link to="/carrinho" className="relative flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 font-medium text-sm px-3 py-2 rounded-xl transition-colors">
-            <ShoppingCart className="w-5 h-5"/>
-            <span className="hidden sm:inline">Carrinho</span>
+          <Link
+            to="/carrinho"
+            className="relative flex items-center gap-2 bg-amber-50 hover:bg-amber-100 rounded-xl px-3 py-2 transition-colors"
+          >
+            <ShoppingCart className="w-5 h-5 text-amber-700" />
             {totalItens > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-amber-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
                 {totalItens}
               </span>
             )}
+            <span className="hidden sm:block text-sm font-medium text-amber-700">
+              {totalItens > 0 ? `${totalItens} iten${totalItens > 1 ? 's' : ''}` : 'Carrinho'}
+            </span>
           </Link>
 
-          {/* ÁREA RESERVADA - sempre visível */}
+          {/* Login / Painel */}
           {usuario ? (
             <Link
               to={usuario.role === 'ADMIN' ? '/admin' : '/vendedor'}
-              className="flex items-center gap-2 bg-[#1a2f7a] hover:bg-[#0f1f5c] text-white font-bold text-sm px-4 py-2 rounded-xl transition-colors shadow"
+              className="btn-secondary text-sm py-2 px-4"
             >
-              <LayoutDashboard className="w-4 h-4"/>
               Painel
             </Link>
           ) : (
             <Link
               to="/login"
-              className="flex items-center gap-2 bg-[#1a2f7a] hover:bg-[#0f1f5c] text-white font-bold text-sm px-4 py-2 rounded-xl transition-colors shadow"
+              className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              <Lock className="w-4 h-4"/>
-              Área Reservada
+              <LogIn className="w-4 h-4" />
+              <span className="hidden sm:block">Entrar</span>
             </Link>
           )}
         </div>
       </div>
 
-      {/* NAV mobile */}
-      <div className="md:hidden flex gap-3 px-4 pb-2 overflow-x-auto text-xs border-t border-gray-100 pt-2">
-        <a href={anchor('#associacoes')} className="text-gray-600 whitespace-nowrap">🏘️ Associações</a>
-        <a href={anchor('#como-comprar')} className="text-gray-600 whitespace-nowrap">🛒 Como Comprar</a>
-        <a href={anchor('#sobre')} className="text-gray-600 whitespace-nowrap">ℹ️ Sobre</a>
-        <Link to="/login" className="text-[#1a2f7a] font-bold whitespace-nowrap ml-auto flex items-center gap-1">
-          <Lock className="w-3 h-3"/> Área Reservada
-        </Link>
+      {/* Menu mobile — linha extra com links */}
+      <div className="md:hidden border-t border-gray-100 bg-white px-4 py-2 flex gap-4 overflow-x-auto text-xs">
+        <a href={anchorHref('#associacoes')} className="flex items-center gap-1 text-gray-600 whitespace-nowrap">
+          🏘️ Associações
+        </a>
+        <a href={anchorHref('#como-comprar')} className="flex items-center gap-1 text-gray-600 whitespace-nowrap">
+          🛒 Como Comprar
+        </a>
+        <a href={anchorHref('#sobre')} className="flex items-center gap-1 text-gray-600 whitespace-nowrap">
+          ℹ️ Sobre
+        </a>
       </div>
     </header>
   )

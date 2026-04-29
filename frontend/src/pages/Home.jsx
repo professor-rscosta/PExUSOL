@@ -1,8 +1,7 @@
 // src/pages/Home.jsx
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ExternalLink, ShoppingBag, Wrench, Sparkles, ArrowRight, MapPin, BookOpen, Users, Target, Handshake, Lock, ShoppingCart } from 'lucide-react';
-import { useCarrinho } from '../contexts/CarrinhoContext';
+import { ExternalLink, ShoppingBag, Wrench, Sparkles, ArrowRight, MapPin, Lock, BookOpen, Users, Target, Handshake } from 'lucide-react';
 import api from '../api/axios';
 
 const ASSOCIACOES = [
@@ -99,8 +98,6 @@ export default function Home() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const { totalItens } = useCarrinho();
-
   const associacoes = ASSOCIACOES.map((est) => {
     const apiData = empresasApi?.find((e) => e.slug === est.slug);
     return { ...est, totalProdutos: apiData?._count?.produtos ?? null };
@@ -108,43 +105,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
-      {/* ── NAVBAR FIXA ───────────────────────────────────────── */}
-      <nav style={{position:'sticky',top:0,zIndex:50,background:'rgba(255,255,255,0.97)',borderBottom:'1px solid #e5e7eb',boxShadow:'0 1px 6px rgba(0,0,0,.07)'}}>
-        <div style={{maxWidth:1280,margin:'0 auto',padding:'0 20px',height:60,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-          {/* Logo */}
-          <a href="/" style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none'}}>
-            <img src="/logos/usina_sol.jpeg" alt="Usina do Sol" style={{width:38,height:38,borderRadius:'50%',objectFit:'cover',border:'2px solid #facc15'}}/>
-            <div>
-              <div style={{fontWeight:700,color:'#1f2937',fontSize:14,lineHeight:1}}>Usina do Sol</div>
-              <div style={{fontSize:11,color:'#9ca3af',lineHeight:1.4}}>UNEB · Velho Chico</div>
-            </div>
-          </a>
-
-          {/* Links centro - desktop */}
-          <div style={{display:'flex',alignItems:'center',gap:4}} className="hidden md:flex">
-            <a href="#associacoes" style={{fontSize:13,fontWeight:500,color:'#374151',padding:'6px 12px',borderRadius:8,textDecoration:'none'}}>🏘️ Associações</a>
-            <a href="#como-comprar" style={{fontSize:13,fontWeight:500,color:'#374151',padding:'6px 12px',borderRadius:8,textDecoration:'none'}}>🛒 Como Comprar</a>
-            <a href="#sobre" style={{fontSize:13,fontWeight:500,color:'#374151',padding:'6px 12px',borderRadius:8,textDecoration:'none'}}>ℹ️ Sobre</a>
-          </div>
-
-          {/* Botões direita */}
-          <div style={{display:'flex',alignItems:'center',gap:8}}>
-            <Link to="/carrinho" style={{position:'relative',display:'flex',alignItems:'center',gap:6,background:'#fffbeb',color:'#92400e',fontWeight:600,fontSize:13,padding:'7px 14px',borderRadius:10,textDecoration:'none'}}>
-              <ShoppingCart size={18}/>
-              <span className="hidden sm:inline">Carrinho</span>
-              {totalItens > 0 && (
-                <span style={{position:'absolute',top:-6,right:-6,background:'#f59e0b',color:'#fff',fontSize:10,fontWeight:700,width:18,height:18,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center'}}>{totalItens}</span>
-              )}
-            </Link>
-
-            <Link to="/login" style={{display:'flex',alignItems:'center',gap:8,background:'#1a2f7a',color:'#ffffff',fontWeight:700,fontSize:13,padding:'8px 16px',borderRadius:10,textDecoration:'none',boxShadow:'0 2px 8px rgba(26,47,122,.25)'}}>
-              <Lock size={15}/>
-              <span>Área Reservada</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
 
       {/* ── HERO ──────────────────────────────────────────────── */}
       <section className="bg-gradient-to-br from-[#0f1f5c] via-[#1a2f7a] to-[#1e40af] text-white">
@@ -426,7 +386,8 @@ export default function Home() {
       {/* ── FOOTER ────────────────────────────────────────────── */}
       <footer className="bg-gray-900 text-gray-400 py-12">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="flex justify-center pb-8 border-b border-gray-700">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-gray-700">
+            {/* Logo + título */}
             <div className="flex items-center gap-3">
               <img src="/logos/usina_sol.jpeg" alt="Usina do Sol"
                 className="w-12 h-12 rounded-full object-cover ring-2 ring-yellow-400/40"/>
@@ -435,6 +396,13 @@ export default function Home() {
                 <p className="text-gray-500 text-xs">UNEB · DCHT · Território Velho Chico</p>
               </div>
             </div>
+
+            {/* Botão painel — canto direito do footer */}
+            <Link to="/login"
+              className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold text-sm px-5 py-2.5 rounded-full transition-all shadow-lg">
+              <Lock className="w-4 h-4" />
+              Acessar Painel Administrativo
+            </Link>
           </div>
 
           <div className="pt-6 text-center space-y-1.5">
