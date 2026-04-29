@@ -1,110 +1,35 @@
-// controllers/usuarioController.js
 const bcrypt = require('bcryptjs');
-const { PrismaClient } = require('@prisma/client');
+const db = require('../db');
 
-const prisma = new PrismaClient();
-
-// ─── LISTAR TODOS (ADMIN) ─────────────────────────────────
 const listar = async (req, res) => {
-  const { empresaId } = req.query;
-
-  const usuarios = await prisma.usuario.findMany({
-    where: {
-      ...(empresaId && { empresaId: Number(empresaId) }),
-    },
-    select: {
-      id: true, nome: true, email: true, role: true,
-      ativo: true, empresaId: true, createdAt: true,
-      empresa: { select: { nome: true, slug: true } },
-    },
-    orderBy: { nome: 'asc' },
-  });
-
-  res.json(usuarios);
+  const [rows] = await db.query('SELECT u.id,u.nome,u.email,u.role,u.ativo,u.empresaId,e.nome as empresaNome FROM usuarios u LEFT JOIN empresas e ON u.empresaId=e.id ORDER BY u.nome');
+  res.json(rows.map(r => ({...r, empresa: r.empresaId?{id:r.empresaId,nome:r.empresaNome}:null})));
 };
 
-// ─── CRIAR VENDEDOR ───────────────────────────────────────
 const criar = async (req, res) => {
   const { nome, email, senha, role, empresaId } = req.body;
-
-  if (!nome || !email || !senha) {
-    return res.status(400).json({ erro: 'Nome, email e senha são obrigatórios' });
-  }
-
-  const existe = await prisma.usuario.findUnique({ where: { email: email.toLowerCase() } });
-  if (existe) return res.status(400).json({ erro: 'Email já cadastrado' });
-
-  if (role === 'VENDEDOR' && !empresaId) {
-    return res.status(400).json({ erro: 'Vendedor precisa de uma empresa' });
-  }
-
+  if (!nome||!email||!senha) return res.status(400).json({ erro: 'Nome, email e senha obrigatórios' });
   const hash = await bcrypt.hash(senha, 10);
-
-  const usuario = await prisma.usuario.create({
-    data: {
-      nome,
-      email: email.toLowerCase().trim(),
-      senha: hash,
-      role: role || 'VENDEDOR',
-      empresaId: empresaId ? Number(empresaId) : null,
-    },
-    select: {
-      id: true, nome: true, email: true, role: true,
-      ativo: true, empresaId: true, createdAt: true,
-      empresa: { select: { nome: true } },
-    },
-  });
-
-  res.status(201).json(usuario);
+  const [r] = await db.query('INSERT INTO usuarios (nome,email,senha,role,empresaId) VALUES (?,?,?,?,?)', [nome, email.toLowerCase(), hash, role||'VENDEDOR', empresaId||null]);
+  res.status(201).json({ id: r.insertId, nome, email, role: role||'VENDEDOR' });
 };
 
-// ─── ATUALIZAR USUÁRIO ────────────────────────────────────
 const atualizar = async (req, res) => {
+  const { nome, email, role, empresaId, ativo, senha } = req.body;
   const { id } = req.params;
-  const { nome, email, senha, empresaId, ativo } = req.body;
-
-  const usuario = await prisma.usuario.findUnique({ where: { id: Number(id) } });
-  if (!usuario) return res.status(404).json({ erro: 'Usuário não encontrado' });
-
-  const dados = {
-    nome: nome || usuario.nome,
-    email: email ? email.toLowerCase() : usuario.email,
-    empresaId: empresaId !== undefined ? (empresaId ? Number(empresaId) : null) : usuario.empresaId,
-    ativo: ativo !== undefined ? Boolean(ativo) : usuario.ativo,
-  };
-
-  if (senha) {
-    dados.senha = await bcrypt.hash(senha, 10);
-  }
-
-  const atualizado = await prisma.usuario.update({
-    where: { id: Number(id) },
-    data: dados,
-    select: {
-      id: true, nome: true, email: true, role: true,
-      ativo: true, empresaId: true,
-      empresa: { select: { nome: true } },
-    },
-  });
-
-  res.json(atualizado);
+  const [ex] = await db.query('SELECT * FROM usuarios WHERE id=?', [id]);
+  if (!ex[0]) return res.status(404).json({ erro: 'Usuário não encontrado' });
+  let q = 'UPDATE usuarios SET nome=?,email=?,role=?,empresaId=?,ativo=?';
+  const params = [nome||ex[0].nome, email||ex[0].email, role||ex[0].role, empresaId!==undefined?empresaId:ex[0].empresaId, ativo!==undefined?(ativo?1:0):ex[0].ativo];
+  if (senha) { q += ',senha=?'; params.push(await bcrypt.hash(senha, 10)); }
+  q += ' WHERE id=?'; params.push(id);
+  await db.query(q, params);
+  res.json({ mensagem: 'Usuário atualizado' });
 };
 
-// ─── EXCLUIR ──────────────────────────────────────────────
 const excluir = async (req, res) => {
-  const { id } = req.params;
-
-  // Não pode excluir a si mesmo
-  if (Number(id) === req.usuario.id) {
-    return res.status(400).json({ erro: 'Não é possível excluir seu próprio usuário' });
-  }
-
-  await prisma.usuario.update({
-    where: { id: Number(id) },
-    data: { ativo: false },
-  });
-
-  res.json({ mensagem: 'Usuário desativado com sucesso' });
+  await db.query('UPDATE usuarios SET ativo=0 WHERE id=?', [req.params.id]);
+  res.json({ mensagem: 'Usuário desativado' });
 };
 
 module.exports = { listar, criar, atualizar, excluir };

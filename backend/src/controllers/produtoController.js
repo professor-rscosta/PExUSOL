@@ -1,225 +1,82 @@
-// controllers/produtoController.js
-const { PrismaClient } = require('@prisma/client');
+const db = require('../db');
 const path = require('path');
-const fs = require('fs');
 
-const prisma = new PrismaClient();
-
-// ─── LISTAR PRODUTOS DE UMA EMPRESA ──────────────────────
 const listarPorEmpresa = async (req, res) => {
   const { slug } = req.params;
-  const { categoria, busca, pagina = 1, limite = 20 } = req.query;
-
-  const empresa = await prisma.empresa.findUnique({ where: { slug } });
-  if (!empresa) return res.status(404).json({ erro: 'Empresa não encontrada' });
-
-  const where = {
-    empresaId: empresa.id,
-    ativo: true,
-    ...(categoria && { categoriaId: Number(categoria) }),
-    ...(busca && {
-      nome: { contains: busca },
-    }),
-  };
-
-  const skip = (Number(pagina) - 1) * Number(limite);
-
-  const [produtos, total] = await Promise.all([
-    prisma.produto.findMany({
-      where,
-      include: { categoria: true },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: Number(limite),
-    }),
-    prisma.produto.count({ where }),
-  ]);
-
-  res.json({
-    produtos,
-    total,
-    pagina: Number(pagina),
-    totalPaginas: Math.ceil(total / Number(limite)),
-  });
+  const { categoria, busca } = req.query;
+  const [emp] = await db.query('SELECT id FROM empresas WHERE slug=? AND ativo=1', [slug]);
+  if (!emp[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
+  let q = 'SELECT p.*, c.nome as categoriaNome FROM produtos p LEFT JOIN categorias c ON p.categoriaId=c.id WHERE p.empresaId=? AND p.ativo=1';
+  const params = [emp[0].id];
+  if (categoria) { q += ' AND p.categoriaId=?'; params.push(categoria); }
+  if (busca) { q += ' AND p.nome LIKE ?'; params.push(`%${busca}%`); }
+  q += ' ORDER BY p.nome';
+  const [rows] = await db.query(q, params);
+  res.json(rows.map(r => ({...r, categoria: r.categoriaId ? {id:r.categoriaId,nome:r.categoriaNome} : null})));
 };
 
-// ─── LISTAR TODOS OS PRODUTOS (ADMIN) ────────────────────
 const listarTodos = async (req, res) => {
-  const { busca, empresaId, categoriaId } = req.query;
-
-  const where = {
-    ...(busca && { nome: { contains: busca } }),
-    ...(empresaId && { empresaId: Number(empresaId) }),
-    ...(categoriaId && { categoriaId: Number(categoriaId) }),
-  };
-
-  const produtos = await prisma.produto.findMany({
-    where,
-    include: { empresa: true, categoria: true },
-    orderBy: { createdAt: 'desc' },
-  });
-
-  res.json(produtos);
+  const [rows] = await db.query(`
+    SELECT p.*, c.nome as cNome, e.nome as eNome, e.slug as eSlug
+    FROM produtos p 
+    LEFT JOIN categorias c ON p.categoriaId=c.id 
+    LEFT JOIN empresas e ON p.empresaId=e.id 
+    ORDER BY e.nome, p.nome`);
+  res.json(rows.map(r => ({...r, categoria: r.categoriaId?{id:r.categoriaId,nome:r.cNome}:null, empresa:{id:r.empresaId,nome:r.eNome,slug:r.eSlug}})));
 };
 
-// ─── LISTAR PARA O VENDEDOR ───────────────────────────────
 const listarVendedor = async (req, res) => {
-  const empresaId = req.usuario.empresaId;
-
-  if (!empresaId) {
-    return res.status(400).json({ erro: 'Vendedor sem empresa associada' });
-  }
-
-  const produtos = await prisma.produto.findMany({
-    where: { empresaId },
-    include: { categoria: true },
-    orderBy: { createdAt: 'desc' },
-  });
-
-  res.json(produtos);
+  const { slug } = req.params;
+  const [emp] = await db.query('SELECT id FROM empresas WHERE slug=?', [slug]);
+  if (!emp[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
+  const [rows] = await db.query('SELECT p.*, c.nome as cNome FROM produtos p LEFT JOIN categorias c ON p.categoriaId=c.id WHERE p.empresaId=? ORDER BY p.nome', [emp[0].id]);
+  res.json(rows.map(r => ({...r, categoria: r.categoriaId?{id:r.categoriaId,nome:r.cNome}:null})));
 };
 
-// ─── BUSCAR POR ID ────────────────────────────────────────
 const buscarPorId = async (req, res) => {
-  const { id } = req.params;
-
-  const produto = await prisma.produto.findUnique({
-    where: { id: Number(id) },
-    include: { empresa: true, categoria: true },
-  });
-
-  if (!produto) return res.status(404).json({ erro: 'Produto não encontrado' });
-
-  res.json(produto);
+  const [rows] = await db.query('SELECT p.*, c.nome as cNome, e.nome as eNome, e.slug as eSlug, e.whatsapp FROM produtos p LEFT JOIN categorias c ON p.categoriaId=c.id LEFT JOIN empresas e ON p.empresaId=e.id WHERE p.id=?', [req.params.id]);
+  if (!rows[0]) return res.status(404).json({ erro: 'Produto não encontrado' });
+  const r = rows[0];
+  res.json({...r, categoria: r.categoriaId?{id:r.categoriaId,nome:r.cNome}:null, empresa:{id:r.empresaId,nome:r.eNome,slug:r.eSlug,whatsapp:r.whatsapp}});
 };
 
-// ─── CRIAR PRODUTO ────────────────────────────────────────
 const criar = async (req, res) => {
-  const { nome, descricao, preco, estoque, unidade, categoriaId } = req.body;
-
-  if (!nome || !preco) {
-    return res.status(400).json({ erro: 'Nome e preço são obrigatórios' });
-  }
-
-  const empresaId = req.usuario.role === 'ADMIN'
-    ? Number(req.body.empresaId)
-    : req.usuario.empresaId;
-
-  if (!empresaId) {
-    return res.status(400).json({ erro: 'Empresa não identificada' });
-  }
-
-  let imagem = null;
-  if (req.file) {
-    imagem = `/uploads/produtos/${req.file.filename}`;
-  }
-
-  const produto = await prisma.produto.create({
-    data: {
-      nome,
-      descricao,
-      preco: parseFloat(preco),
-      estoque: parseInt(estoque) || 0,
-      unidade: unidade || 'un',
-      imagem,
-      empresaId,
-      categoriaId: categoriaId ? Number(categoriaId) : null,
-    },
-    include: { categoria: true },
-  });
-
-  res.status(201).json(produto);
+  const { nome, descricao, preco, estoque, unidade, categoriaId, empresaId, ativo } = req.body;
+  if (!nome||!preco||!empresaId) return res.status(400).json({ erro: 'Nome, preço e empresa obrigatórios' });
+  const imagem = req.file ? req.file.filename : null;
+  const [r] = await db.query(
+    'INSERT INTO produtos (nome,descricao,preco,estoque,unidade,categoriaId,empresaId,ativo,imagem) VALUES (?,?,?,?,?,?,?,?,?)',
+    [nome, descricao||null, preco, estoque||0, unidade||'un', categoriaId||null, empresaId, ativo===false||ativo==='false'?0:1, imagem]
+  );
+  const [rows] = await db.query('SELECT * FROM produtos WHERE id=?', [r.insertId]);
+  res.status(201).json(rows[0]);
 };
 
-// ─── ATUALIZAR PRODUTO ────────────────────────────────────
 const atualizar = async (req, res) => {
   const { id } = req.params;
+  const [ex] = await db.query('SELECT * FROM produtos WHERE id=?', [id]);
+  if (!ex[0]) return res.status(404).json({ erro: 'Produto não encontrado' });
+  const p = ex[0];
   const { nome, descricao, preco, estoque, unidade, categoriaId, ativo } = req.body;
-
-  const produto = await prisma.produto.findUnique({ where: { id: Number(id) } });
-  if (!produto) return res.status(404).json({ erro: 'Produto não encontrado' });
-
-  // Vendedor só edita produtos da própria empresa
-  if (req.usuario.role === 'VENDEDOR' && produto.empresaId !== req.usuario.empresaId) {
-    return res.status(403).json({ erro: 'Sem permissão para editar este produto' });
-  }
-
-  let imagem = produto.imagem;
-  if (req.file) {
-    imagem = `/uploads/produtos/${req.file.filename}`;
-    if (produto.imagem) {
-      const oldPath = path.join(__dirname, '..', '..', produto.imagem);
-      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-    }
-  }
-
-  const atualizado = await prisma.produto.update({
-    where: { id: Number(id) },
-    data: {
-      nome: nome || produto.nome,
-      descricao: descricao !== undefined ? descricao : produto.descricao,
-      preco: preco ? parseFloat(preco) : produto.preco,
-      estoque: estoque !== undefined ? parseInt(estoque) : produto.estoque,
-      unidade: unidade || produto.unidade,
-      imagem,
-      categoriaId: categoriaId !== undefined ? (categoriaId ? Number(categoriaId) : null) : produto.categoriaId,
-      ativo: ativo !== undefined ? (ativo === 'true' || ativo === true) : produto.ativo,
-    },
-    include: { categoria: true },
-  });
-
-  res.json(atualizado);
+  const imagem = req.file ? req.file.filename : p.imagem;
+  await db.query(
+    'UPDATE produtos SET nome=?,descricao=?,preco=?,estoque=?,unidade=?,categoriaId=?,ativo=?,imagem=? WHERE id=?',
+    [nome||p.nome, descricao!==undefined?descricao:p.descricao, preco||p.preco, estoque!==undefined?estoque:p.estoque, unidade||p.unidade, categoriaId!==undefined?categoriaId:p.categoriaId, ativo!==undefined?(ativo===false||ativo==='false'?0:1):p.ativo, imagem, id]
+  );
+  const [rows] = await db.query('SELECT * FROM produtos WHERE id=?', [id]);
+  res.json(rows[0]);
 };
 
-// ─── EXCLUIR PRODUTO ──────────────────────────────────────
 const excluir = async (req, res) => {
-  const { id } = req.params;
-
-  const produto = await prisma.produto.findUnique({ where: { id: Number(id) } });
-  if (!produto) return res.status(404).json({ erro: 'Produto não encontrado' });
-
-  if (req.usuario.role === 'VENDEDOR' && produto.empresaId !== req.usuario.empresaId) {
-    return res.status(403).json({ erro: 'Sem permissão' });
-  }
-
-  // Remove imagem
-  if (produto.imagem) {
-    const imgPath = path.join(__dirname, '..', '..', produto.imagem);
-    if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
-  }
-
-  await prisma.produto.delete({ where: { id: Number(id) } });
-  res.json({ mensagem: 'Produto excluído com sucesso' });
+  await db.query('DELETE FROM produtos WHERE id=?', [req.params.id]);
+  res.json({ mensagem: 'Produto excluído' });
 };
 
-// ─── BUSCA GLOBAL ─────────────────────────────────────────
 const buscaGlobal = async (req, res) => {
   const { q } = req.query;
-
-  if (!q || q.trim().length < 2) {
-    return res.status(400).json({ erro: 'Busca muito curta' });
-  }
-
-  const produtos = await prisma.produto.findMany({
-    where: {
-      ativo: true,
-      nome: { contains: q },
-      empresa: { ativo: true },
-    },
-    include: { empresa: true, categoria: true },
-    take: 30,
-  });
-
-  res.json(produtos);
+  if (!q) return res.json([]);
+  const [rows] = await db.query('SELECT p.*, e.nome as eNome, e.slug FROM produtos p LEFT JOIN empresas e ON p.empresaId=e.id WHERE p.ativo=1 AND p.nome LIKE ? LIMIT 20', [`%${q}%`]);
+  res.json(rows);
 };
 
-module.exports = {
-  listarPorEmpresa,
-  listarTodos,
-  listarVendedor,
-  buscarPorId,
-  criar,
-  atualizar,
-  excluir,
-  buscaGlobal,
-};
+module.exports = { listarPorEmpresa, listarTodos, listarVendedor, buscarPorId, criar, atualizar, excluir, buscaGlobal };

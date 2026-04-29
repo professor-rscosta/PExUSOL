@@ -1,164 +1,74 @@
-// controllers/empresaController.js
-const { PrismaClient } = require('@prisma/client');
+const db   = require('../db');
 const path = require('path');
-const fs = require('fs');
+const fs   = require('fs');
 
-const prisma = new PrismaClient();
-
-// ─── LISTAR TODAS ─────────────────────────────────────────
 const listar = async (req, res) => {
-  const empresas = await prisma.empresa.findMany({
-    where: { ativo: true },
-    include: {
-      _count: { select: { produtos: true, pedidos: true, usuarios: true } },
-    },
-    orderBy: { nome: 'asc' },
-  });
-  res.json(empresas);
+  const [rows] = await db.query(`
+    SELECT e.*, 
+      (SELECT COUNT(*) FROM produtos p WHERE p.empresaId=e.id) as totalProdutos,
+      (SELECT COUNT(*) FROM pedidos pd WHERE pd.empresaId=e.id) as totalPedidos,
+      (SELECT COUNT(*) FROM usuarios u WHERE u.empresaId=e.id) as totalUsuarios
+    FROM empresas e WHERE e.ativo=1 ORDER BY e.nome`);
+  res.json(rows);
 };
 
-// ─── LISTAR TODAS (ADMIN) ─────────────────────────────────
 const listarAdmin = async (req, res) => {
-  const empresas = await prisma.empresa.findMany({
-    include: {
-      _count: { select: { produtos: true, pedidos: true, usuarios: true } },
-    },
-    orderBy: { nome: 'asc' },
-  });
-  res.json(empresas);
+  const [rows] = await db.query(`
+    SELECT e.*,
+      (SELECT COUNT(*) FROM produtos p WHERE p.empresaId=e.id) as totalProdutos,
+      (SELECT COUNT(*) FROM pedidos pd WHERE pd.empresaId=e.id) as totalPedidos
+    FROM empresas e ORDER BY e.nome`);
+  res.json(rows);
 };
 
-// ─── BUSCAR POR SLUG ──────────────────────────────────────
 const buscarPorSlug = async (req, res) => {
-  const { slug } = req.params;
-
-  const empresa = await prisma.empresa.findUnique({
-    where: { slug },
-    include: {
-      _count: { select: { produtos: { where: { ativo: true } } } },
-    },
-  });
-
-  if (!empresa) {
-    return res.status(404).json({ erro: 'Empresa não encontrada' });
-  }
-
-  res.json(empresa);
+  const [rows] = await db.query('SELECT * FROM empresas WHERE slug=? AND ativo=1', [req.params.slug]);
+  if (!rows[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
+  res.json(rows[0]);
 };
 
-// ─── CRIAR ────────────────────────────────────────────────
 const criar = async (req, res) => {
   const { nome, slug, descricao, whatsapp, site, endereco, cidade } = req.body;
-
-  if (!nome || !slug || !whatsapp) {
-    return res.status(400).json({ erro: 'Nome, slug e WhatsApp são obrigatórios' });
-  }
-
-  const slugNormalizado = slug.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-
+  if (!nome||!slug||!whatsapp) return res.status(400).json({ erro: 'Nome, slug e WhatsApp obrigatórios' });
   const logo = req.file ? `uploads/produtos/${req.file.filename}` : null;
-
-  const empresa = await prisma.empresa.create({
-    data: { nome, slug: slugNormalizado, descricao, whatsapp: whatsapp.replace(/\D/g, ''), site: site || null, endereco, cidade, logo },
-  });
-
-  res.status(201).json(empresa);
+  const [r] = await db.query(
+    'INSERT INTO empresas (nome,slug,descricao,whatsapp,site,logo,endereco,cidade) VALUES (?,?,?,?,?,?,?,?)',
+    [nome, slug.toLowerCase().replace(/[^a-z0-9-]/g,'-'), descricao||null, whatsapp.replace(/\D/g,''), site||null, logo, endereco||null, cidade||null]
+  );
+  const [rows] = await db.query('SELECT * FROM empresas WHERE id=?', [r.insertId]);
+  res.status(201).json(rows[0]);
 };
 
-// ─── ATUALIZAR ────────────────────────────────────────────
 const atualizar = async (req, res) => {
   const { id } = req.params;
-  const { nome, descricao, whatsapp, endereco, cidade, ativo } = req.body;
-
-  const empresa = await prisma.empresa.findUnique({ where: { id: Number(id) } });
-  if (!empresa) return res.status(404).json({ erro: 'Empresa não encontrada' });
-
-  // Restrição: vendedor só pode editar sua própria empresa
-  if (req.usuario.role === 'VENDEDOR' && req.usuario.empresaId !== Number(id)) {
-    return res.status(403).json({ erro: 'Sem permissão' });
-  }
-
-  // Upload de logo
-  let logo = empresa.logo;
-  if (req.file) {
-    logo = `uploads/produtos/${req.file.filename}`;
-    // Remove logo anterior
-    if (empresa.logo) {
-      const oldPath = path.join(__dirname, '..', '..', empresa.logo);
-      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-    }
-  }
-
-  const atualizada = await prisma.empresa.update({
-    where: { id: Number(id) },
-    data: {
-      nome: nome || empresa.nome,
-      descricao: descricao !== undefined ? descricao : empresa.descricao,
-      whatsapp: whatsapp ? whatsapp.replace(/\D/g, '') : empresa.whatsapp,
-      site: req.body.site !== undefined ? req.body.site : empresa.site,
-      endereco: endereco !== undefined ? endereco : empresa.endereco,
-      cidade: cidade !== undefined ? cidade : empresa.cidade,
-      logo,
-      ativo: ativo !== undefined ? Boolean(ativo) : empresa.ativo,
-    },
-  });
-
-  res.json(atualizada);
+  const { nome, descricao, whatsapp, site, endereco, cidade, ativo } = req.body;
+  const [ex] = await db.query('SELECT * FROM empresas WHERE id=?', [id]);
+  if (!ex[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
+  const logo = req.file ? `uploads/produtos/${req.file.filename}` : ex[0].logo;
+  await db.query(
+    'UPDATE empresas SET nome=?,descricao=?,whatsapp=?,site=?,logo=?,endereco=?,cidade=?,ativo=? WHERE id=?',
+    [nome||ex[0].nome, descricao!==undefined?descricao:ex[0].descricao, whatsapp?whatsapp.replace(/\D/g,''):ex[0].whatsapp, site!==undefined?site:ex[0].site, logo, endereco!==undefined?endereco:ex[0].endereco, cidade!==undefined?cidade:ex[0].cidade, ativo!==undefined?(ativo==='false'||ativo===false?0:1):ex[0].ativo, id]
+  );
+  const [rows] = await db.query('SELECT * FROM empresas WHERE id=?', [id]);
+  res.json(rows[0]);
 };
 
-// ─── EXCLUIR ──────────────────────────────────────────────
 const excluir = async (req, res) => {
-  const { id } = req.params;
-
-  await prisma.empresa.update({
-    where: { id: Number(id) },
-    data: { ativo: false },
-  });
-
-  res.json({ mensagem: 'Empresa desativada com sucesso' });
+  await db.query('UPDATE empresas SET ativo=0 WHERE id=?', [req.params.id]);
+  res.json({ mensagem: 'Empresa desativada' });
 };
 
-// ─── DASHBOARD DA EMPRESA ─────────────────────────────────
 const dashboard = async (req, res) => {
-  const empresaId = req.usuario.role === 'ADMIN'
-    ? Number(req.params.id)
-    : req.usuario.empresaId;
-
-  const hoje = new Date();
-  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-
-  const [totalProdutos, totalPedidos, pedidosMes, receitaMes, pedidosRecentes] =
-    await Promise.all([
-      prisma.produto.count({ where: { empresaId, ativo: true } }),
-      prisma.pedido.count({ where: { empresaId } }),
-      prisma.pedido.count({
-        where: { empresaId, createdAt: { gte: inicioMes } },
-      }),
-      prisma.pedido.aggregate({
-        where: {
-          empresaId,
-          createdAt: { gte: inicioMes },
-          status: { notIn: ['CANCELADO'] },
-        },
-        _sum: { total: true },
-      }),
-      prisma.pedido.findMany({
-        where: { empresaId },
-        take: 5,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          itens: { include: { produto: { select: { nome: true } } } },
-        },
-      }),
-    ]);
-
-  res.json({
-    totalProdutos,
-    totalPedidos,
-    pedidosMes,
-    receitaMes: receitaMes._sum.total || 0,
-    pedidosRecentes,
-  });
+  const slug = req.params.slug || req.usuario?.empresa?.slug;
+  const [emp] = await db.query('SELECT id FROM empresas WHERE slug=?', [slug]);
+  if (!emp[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
+  const id = emp[0].id;
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const mes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const [[h]] = await db.query('SELECT COUNT(*) as c FROM pedidos WHERE empresaId=? AND criadoEm>=?', [id, hoje]);
+  const [[m]] = await db.query('SELECT COUNT(*) as c, COALESCE(SUM(total),0) as r FROM pedidos WHERE empresaId=? AND criadoEm>=? AND status!="CANCELADO"', [id, mes]);
+  const [[p]] = await db.query('SELECT COUNT(*) as c FROM produtos WHERE empresaId=? AND ativo=1', [id]);
+  res.json({ pedidosHoje: h.c, pedidosMes: m.c, receitaMes: m.r, produtosAtivos: p.c });
 };
 
 module.exports = { listar, listarAdmin, buscarPorSlug, criar, atualizar, excluir, dashboard };
