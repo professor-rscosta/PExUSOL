@@ -39,11 +39,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/ping', (req, res) => res.json({ pong: true }));
-// Teste direto em /api sem passar pelas routes
-app.get('/api/ping', (req, res) => {
-  console.log('api/ping acessado!');
-  res.json({ api: 'ok', db_url: !!process.env.DATABASE_URL });
-});
+
 app.get('/status', (req, res) => res.json({ status: 'online' }));
 app.use('/api', routes);
 

@@ -1,8 +1,12 @@
-# Permite que todas as rotas passem para o Node.js
-Options -MultiViews
-RewriteEngine On
+PassengerAppRoot /home/u429575031/domains/pexusol.rscacademy.com.br/nodejs
+PassengerAppType node
+PassengerNodejs /opt/alt/alt-nodejs22/root/bin/node
+PassengerStartupFile src/server.js
+PassengerBaseURI /
+PassengerRestartDir /home/u429575031/domains/pexusol.rscacademy.com.br/nodejs/tmp
 
-# Não interferir com /api/ - deixar o Node.js tratar
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.html [L]
+SetEnv NODE_OPTIONS "--require /home/u429575031/domains/pexusol.rscacademy.com.br/public_html/.builds/config/preload-timestamp.js"
+SetEnv LSNODE_CONSOLE_LOG console.log
+
+RewriteEngine On
+RewriteRule ^\.builds - [F,L]
