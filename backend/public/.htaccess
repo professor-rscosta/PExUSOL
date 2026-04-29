@@ -1,0 +1,8 @@
+# Permite que todas as rotas passem para o Node.js
+Options -MultiViews
+RewriteEngine On
+
+# Não interferir com /api/ - deixar o Node.js tratar
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
