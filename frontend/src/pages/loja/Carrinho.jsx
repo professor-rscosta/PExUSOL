@@ -5,7 +5,7 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, MessageCircle, Search, Ma
 import toast from 'react-hot-toast'
 import api from '../../api/axios'
 import { useCarrinho } from '../../contexts/CarrinhoContext'
-import { formatarMoeda, gerarMensagemWhatsApp } from '../../utils'
+import { formatarMoeda } from '../../utils'
 import HeaderPublico from '../../components/layout/HeaderPublico'
 
 const ESTADOS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
@@ -74,19 +74,20 @@ export default function Carrinho() {
 
       const { data: empresa } = await api.get(`/empresas/${empresaSlug}`)
 
-      const msg = gerarMensagemWhatsApp(
-        pedido.protocolo,
-        itens.map(i => ({ nome: i.nome, preco: i.preco, quantidade: i.quantidade })),
-        form.tipoEntrega,
-        enderecoCompleto(),
-        form.observacao,
-        form.clienteNome,
-        form.clienteTelefone,
-        empresa.nome
-      )
+      // Passa dados brutos — a mensagem é gerada e encodada em CheckoutSucesso
+      const dadosPedido = {
+        protocolo: pedido.protocolo,
+        itens: itens.map(i => ({ nome: i.nome, preco: i.preco, quantidade: i.quantidade })),
+        tipoEntrega: form.tipoEntrega,
+        endereco: enderecoCompleto(),
+        observacao: form.observacao,
+        clienteNome: form.clienteNome,
+        clienteTelefone: form.clienteTelefone,
+        empresaNome: empresa.nome,
+      }
 
       limpar()
-      navigate('/pedido/sucesso', { state: { pedido, whatsapp: empresa.whatsapp, msg } })
+      navigate('/pedido/sucesso', { state: { pedido, whatsapp: empresa.whatsapp, dadosPedido } })
     } catch (err) {
       toast.error(err.response?.data?.erro || 'Erro ao finalizar pedido')
     } finally {

@@ -1,6 +1,6 @@
-// src/pages/loja/CheckoutSucesso.jsx
 import { useLocation, Link } from 'react-router-dom'
 import { CheckCircle, MessageCircle, Home } from 'lucide-react'
+import { gerarMensagemWhatsApp } from '../../utils'
 
 export default function CheckoutSucesso() {
   const { state } = useLocation()
@@ -15,8 +15,25 @@ export default function CheckoutSucesso() {
     )
   }
 
-  const { pedido, whatsapp, msg } = state
-  const waUrl = `https://wa.me/${whatsapp}?text=${msg}`
+  const { pedido, whatsapp, dadosPedido } = state
+
+  // Gera e encoda a mensagem AQUI — no momento de montar o href
+  // Evita qualquer corrupcao por serialização do React Router
+  const msgEncoded = gerarMensagemWhatsApp(
+    dadosPedido.protocolo,
+    dadosPedido.itens,
+    dadosPedido.tipoEntrega,
+    dadosPedido.endereco,
+    dadosPedido.observacao,
+    dadosPedido.clienteNome,
+    dadosPedido.clienteTelefone,
+    dadosPedido.empresaNome
+  )
+
+  // Monta o numero garantindo codigo do Brasil
+  const num = String(whatsapp || '').replace(/\D/g, '')
+  const numBR = num.startsWith('55') ? num : '55' + num
+  const waUrl = 'https://wa.me/' + numBR + '?text=' + msgEncoded
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center p-4">
@@ -25,7 +42,7 @@ export default function CheckoutSucesso() {
           <CheckCircle className="w-10 h-10 text-green-500" />
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Pedido registrado! 🎉</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">Pedido registrado!</h1>
         <p className="text-gray-500 mb-2">
           Protocolo: <strong className="text-gray-800">{pedido.protocolo}</strong>
         </p>
