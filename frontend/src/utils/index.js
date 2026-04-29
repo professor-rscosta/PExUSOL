@@ -39,7 +39,10 @@ export const STATUS_PEDIDO = {
   ENVIADO:     { label: '🚚 Enviado',     classe: 'badge-pronto' },
 }
 
-export const gerarMensagemWhatsApp = (pedido, itens, tipoEntrega, endereco, observacao) => {
+export const gerarMensagemWhatsApp = (
+  pedido, itens, tipoEntrega, endereco, observacao,
+  clienteNome = '', clienteTelefone = '', empresaNome = ''
+) => {
   const protocolo = pedido || `PED-${new Date().getFullYear()}-XXXX`
   const dataHora = new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
@@ -47,26 +50,45 @@ export const gerarMensagemWhatsApp = (pedido, itens, tipoEntrega, endereco, obse
   }).format(new Date())
 
   const listaItens = itens
-    .map((i) => `  • ${i.nome} x${i.quantidade} — ${formatarMoeda(i.preco * i.quantidade)}`)
+    .map((i) => `    ▸ ${i.nome}\n      ${i.quantidade}x × ${formatarMoeda(i.preco)} = *${formatarMoeda(i.preco * i.quantidade)}*`)
     .join('\n')
 
   const total = itens.reduce((a, i) => a + parseFloat(i.preco) * i.quantidade, 0)
 
-  let msg = `🌞 *PEDIDO — USINA DO SOL*\n`
-  msg += `━━━━━━━━━━━━━━━━━━━━\n`
-  msg += `📋 Protocolo: *${protocolo}*\n`
-  msg += `📅 Data/Hora: ${dataHora}\n\n`
-  msg += `🛍️ *ITENS DO PEDIDO:*\n`
-  msg += `${listaItens}\n\n`
-  msg += `💰 *Total: ${formatarMoeda(total)}*\n\n`
-  msg += `🚚 Entrega: *${tipoEntrega === 'ENTREGA' ? '🏠 Entrega no endereço' : '🏪 Retirada na loja'}*\n`
+  let msg = `☀️ *USINA DO SOL — NOVO PEDIDO*\n`
+  msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`
+  if (empresaNome) {
+    msg += `🏪 *${empresaNome}*\n`
+    msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`
+  }
+  msg += `\n`
+  msg += `👤 *CLIENTE*\n`
+  msg += `   Nome: *${clienteNome || 'Não informado'}*\n`
+  if (clienteTelefone) {
+    msg += `   📱 Telefone: *${clienteTelefone}*\n`
+  }
+  msg += `\n`
+  msg += `📋 *PEDIDO*\n`
+  msg += `   🔖 Protocolo: *${protocolo}*\n`
+  msg += `   📅 Data/Hora: ${dataHora}\n`
+  msg += `\n`
+  msg += `🛍️ *ITENS*\n`
+  msg += `${listaItens}\n`
+  msg += `\n`
+  msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`
+  msg += `💰 *TOTAL: ${formatarMoeda(total)}*\n`
+  msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`
+  msg += `\n`
+  msg += `🚚 *ENTREGA*\n`
+  msg += `   ${tipoEntrega === 'ENTREGA' ? '🏠 Entrega no endereço' : '🏪 Retirada na loja'}\n`
   if (tipoEntrega === 'ENTREGA' && endereco) {
-    msg += `📍 Endereço: ${endereco}\n`
+    msg += `   📍 ${endereco}\n`
   }
   if (observacao) {
-    msg += `📝 Obs: ${observacao}\n`
+    msg += `\n📝 *Observação:* ${observacao}\n`
   }
-  msg += `\n_Aguardo confirmação do pedido!_ 😊`
+  msg += `\n`
+  msg += `_Olá! Acabei de fazer um pedido pelo site Usina do Sol. Aguardo a confirmação!_ 😊🌻`
 
   return encodeURIComponent(msg)
 }

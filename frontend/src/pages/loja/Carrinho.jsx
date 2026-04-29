@@ -79,7 +79,10 @@ export default function Carrinho() {
         itens.map(i => ({ nome: i.nome, preco: i.preco, quantidade: i.quantidade })),
         form.tipoEntrega,
         enderecoCompleto(),
-        form.observacao
+        form.observacao,
+        form.clienteNome,
+        form.clienteTelefone,
+        empresa.nome
       )
 
       limpar()
