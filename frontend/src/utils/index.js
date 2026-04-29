@@ -49,46 +49,66 @@ export const gerarMensagemWhatsApp = (
     timeStyle: 'short',
   }).format(new Date())
 
+  // Emojis via Unicode para garantir compatibilidade
+  const E = {
+    sol:     '\uD83C\uDF1E', // 🌞
+    loja:    '\uD83C\uDFEA', // 🏬
+    cliente: '\uD83D\uDC64', // 👤
+    tel:     '\uD83D\uDCF1', // 📱
+    pedido:  '\uD83D\uDCCB', // 📋
+    proto:   '\uD83D\uDD16', // 🔖
+    data:    '\uD83D\uDCC5', // 📅
+    itens:   '\uD83D\uDED2', // 🛒
+    total:   '\uD83D\uDCB0', // 💰
+    entrega: '\uD83D\uDE9A', // 🚚
+    pin:     '\uD83D\uDCCD', // 📍
+    obs:     '\uD83D\uDCDD', // 📝
+    casa:    '\uD83C\uDFE0', // 🏠
+    ok:      '\u2705',        // ✅
+    flor:    '\uD83C\uDF3B', // 🌻
+    smile:   '\uD83D\uDE0A', // 😊
+  }
+
   const listaItens = itens
-    .map((i) => `    ▸ ${i.nome}\n      ${i.quantidade}x × ${formatarMoeda(i.preco)} = *${formatarMoeda(i.preco * i.quantidade)}*`)
+    .map((i) => `   ${E.ok} ${i.nome}\n       ${i.quantidade}x × ${formatarMoeda(i.preco)} = *${formatarMoeda(i.preco * i.quantidade)}*`)
     .join('\n')
 
   const total = itens.reduce((a, i) => a + parseFloat(i.preco) * i.quantidade, 0)
 
-  let msg = `☀️ *USINA DO SOL — NOVO PEDIDO*\n`
+  let msg = `${E.sol} *USINA DO SOL — NOVO PEDIDO* ${E.sol}\n`
   msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`
   if (empresaNome) {
-    msg += `🏪 *${empresaNome}*\n`
+    msg += `${E.loja} *${empresaNome}*\n`
     msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`
   }
   msg += `\n`
-  msg += `👤 *CLIENTE*\n`
+  msg += `${E.cliente} *CLIENTE*\n`
   msg += `   Nome: *${clienteNome || 'Não informado'}*\n`
   if (clienteTelefone) {
-    msg += `   📱 Telefone: *${clienteTelefone}*\n`
+    msg += `   ${E.tel} Tel: *${clienteTelefone}*\n`
   }
   msg += `\n`
-  msg += `📋 *PEDIDO*\n`
-  msg += `   🔖 Protocolo: *${protocolo}*\n`
-  msg += `   📅 Data/Hora: ${dataHora}\n`
+  msg += `${E.pedido} *DADOS DO PEDIDO*\n`
+  msg += `   ${E.proto} Protocolo: *${protocolo}*\n`
+  msg += `   ${E.data} Data/Hora: ${dataHora}\n`
   msg += `\n`
-  msg += `🛍️ *ITENS*\n`
+  msg += `${E.itens} *ITENS DO PEDIDO*\n`
   msg += `${listaItens}\n`
   msg += `\n`
   msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`
-  msg += `💰 *TOTAL: ${formatarMoeda(total)}*\n`
+  msg += `${E.total} *TOTAL: ${formatarMoeda(total)}*\n`
   msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`
   msg += `\n`
-  msg += `🚚 *ENTREGA*\n`
-  msg += `   ${tipoEntrega === 'ENTREGA' ? '🏠 Entrega no endereço' : '🏪 Retirada na loja'}\n`
+  msg += `${E.entrega} *ENTREGA*\n`
+  msg += `   ${tipoEntrega === 'ENTREGA' ? E.casa + ' Entrega no endereço' : E.loja + ' Retirada na loja'}\n`
   if (tipoEntrega === 'ENTREGA' && endereco) {
-    msg += `   📍 ${endereco}\n`
+    msg += `   ${E.pin} *${endereco}*\n`
   }
   if (observacao) {
-    msg += `\n📝 *Observação:* ${observacao}\n`
+    msg += `\n${E.obs} *Observação:* ${observacao}\n`
   }
   msg += `\n`
-  msg += `_Olá! Acabei de fazer um pedido pelo site Usina do Sol. Aguardo a confirmação!_ 😊🌻`
+  msg += `_Olá! Fiz um pedido pelo site Usina do Sol. Aguardo confirmação!_ ${E.smile}${E.flor}`
 
   return encodeURIComponent(msg)
 }
