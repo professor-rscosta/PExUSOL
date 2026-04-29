@@ -7,7 +7,7 @@ import { formatarMoeda, formatarData, STATUS_PEDIDO } from '../../utils';
 import toast from 'react-hot-toast';
 
 const STATUS_OPCOES = [
-  'PENDENTE', 'CONFIRMADO', 'EM_PREPARO', 'PRONTO', 'ENTREGUE', 'CANCELADO',
+  'PENDENTE', 'CONFIRMADO', 'PREPARANDO', 'ENVIADO', 'ENTREGUE', 'CANCELADO',
 ];
 
 export default function VendedorPedidos() {

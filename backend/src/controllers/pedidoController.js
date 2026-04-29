@@ -2,7 +2,7 @@ const db = require('../db');
 
 const gerarProtocolo = async () => {
   const ano = new Date().getFullYear();
-  const [[r]] = await db.query("SELECT COUNT(*) as c FROM pedidos WHERE YEAR(criadoEm)=?", [ano]);
+  const [[r]] = await db.query("SELECT COUNT(*) as c FROM pedidos WHERE YEAR(createdAt)=?", [ano]);
   const num = String(r.c + 1).padStart(4, '0');
   return `PED-${ano}-${num}`;
 };
@@ -54,7 +54,7 @@ const listarPorEmpresa = async (req, res) => {
   const params = [emp[0].id];
   if (status) { q += ' AND status=?'; params.push(status); }
   const [[{total}]] = await db.query(q.replace('SELECT *','SELECT COUNT(*) as total'), params);
-  q += ' ORDER BY criadoEm DESC LIMIT ? OFFSET ?';
+  q += ' ORDER BY createdAt DESC LIMIT ? OFFSET ?';
   params.push(Number(limite), (Number(pagina)-1)*Number(limite));
   const [rows] = await db.query(q, params);
   res.json({ pedidos: rows, total, totalPaginas: Math.ceil(total/limite), pagina: Number(pagina) });
@@ -88,10 +88,10 @@ const relatorio = async (req, res) => {
   const id = emp[0].id;
   const di = dataInicio || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
   const df = dataFim || new Date().toISOString().split('T')[0];
-  const [[tot]] = await db.query("SELECT COUNT(*) as totalPedidos, COALESCE(SUM(total),0) as receitaTotal, COALESCE(AVG(total),0) as ticketMedio FROM pedidos WHERE empresaId=? AND status!='CANCELADO' AND DATE(criadoEm) BETWEEN ? AND ?", [id,di,df]);
-  const [[ti]] = await db.query("SELECT COALESCE(SUM(i.quantidade),0) as totalItens FROM itens_pedido i JOIN pedidos p ON i.pedidoId=p.id WHERE p.empresaId=? AND p.status!='CANCELADO' AND DATE(p.criadoEm) BETWEEN ? AND ?", [id,di,df]);
-  const [top] = await db.query("SELECT i.produtoId, prod.nome as nomeProduto, SUM(i.quantidade) as totalQuantidade, SUM(i.quantidade*i.preco) as totalReceita FROM itens_pedido i JOIN pedidos p ON i.pedidoId=p.id JOIN produtos prod ON i.produtoId=prod.id WHERE p.empresaId=? AND p.status!='CANCELADO' AND DATE(p.criadoEm) BETWEEN ? AND ? GROUP BY i.produtoId ORDER BY totalQuantidade DESC LIMIT 10", [id,di,df]);
-  const [byStatus] = await db.query("SELECT status, COUNT(*) as _count FROM pedidos WHERE empresaId=? AND DATE(criadoEm) BETWEEN ? AND ? GROUP BY status", [id,di,df]);
+  const [[tot]] = await db.query("SELECT COUNT(*) as totalPedidos, COALESCE(SUM(total),0) as receitaTotal, COALESCE(AVG(total),0) as ticketMedio FROM pedidos WHERE empresaId=? AND status!='CANCELADO' AND DATE(createdAt) BETWEEN ? AND ?", [id,di,df]);
+  const [[ti]] = await db.query("SELECT COALESCE(SUM(i.quantidade),0) as totalItens FROM itens_pedido i JOIN pedidos p ON i.pedidoId=p.id WHERE p.empresaId=? AND p.status!='CANCELADO' AND DATE(p.createdAt) BETWEEN ? AND ?", [id,di,df]);
+  const [top] = await db.query("SELECT i.produtoId, prod.nome as nomeProduto, SUM(i.quantidade) as totalQuantidade, SUM(i.quantidade*i.preco) as totalReceita FROM itens_pedido i JOIN pedidos p ON i.pedidoId=p.id JOIN produtos prod ON i.produtoId=prod.id WHERE p.empresaId=? AND p.status!='CANCELADO' AND DATE(p.createdAt) BETWEEN ? AND ? GROUP BY i.produtoId ORDER BY totalQuantidade DESC LIMIT 10", [id,di,df]);
+  const [byStatus] = await db.query("SELECT status, COUNT(*) as _count FROM pedidos WHERE empresaId=? AND DATE(createdAt) BETWEEN ? AND ? GROUP BY status", [id,di,df]);
   res.json({ ...tot, ...ti, produtosMaisVendidos: top, pedidosPorStatus: byStatus });
 };
 

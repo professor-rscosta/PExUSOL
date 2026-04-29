@@ -66,8 +66,8 @@ const dashboard = async (req, res) => {
   const id = emp[0].id;
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   const mes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  const [[h]] = await db.query('SELECT COUNT(*) as c FROM pedidos WHERE empresaId=? AND criadoEm>=?', [id, hoje]);
-  const [[m]] = await db.query('SELECT COUNT(*) as c, COALESCE(SUM(total),0) as r FROM pedidos WHERE empresaId=? AND criadoEm>=? AND status!="CANCELADO"', [id, mes]);
+  const [[h]] = await db.query('SELECT COUNT(*) as c FROM pedidos WHERE empresaId=? AND createdAt>=?', [id, hoje]);
+  const [[m]] = await db.query('SELECT COUNT(*) as c, COALESCE(SUM(total),0) as r FROM pedidos WHERE empresaId=? AND createdAt>=? AND status!="CANCELADO"', [id, mes]);
   const [[p]] = await db.query('SELECT COUNT(*) as c FROM produtos WHERE empresaId=? AND ativo=1', [id]);
   res.json({ pedidosHoje: h.c, pedidosMes: m.c, receitaMes: m.r, produtosAtivos: p.c });
 };
