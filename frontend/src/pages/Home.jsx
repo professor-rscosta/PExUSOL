@@ -74,7 +74,7 @@ const PROJETOS = [
 ];
 
 const FASES = [
-  { n: '01', titulo: 'Mapeamento', desc: 'Identificação e levantamento das associações nos municípios de Bom Jesus da Lapa, Serra do Ramalho, Paratinga e Riacho de Santana.', icone: '🗺️' },
+  { n: '01', titulo: 'Mapeamento', desc: 'Identificação e levantamento das associações nos municípios de Bom Jesus da Lapa, Sítio do Mato, Serra do Ramalho, Paratinga e Riacho de Santana.', icone: '🗺️' },
   { n: '02', titulo: 'Capacitação', desc: 'Oficinas práticas de formação administrativa, jurídica e de gestão financeira para os membros das associações.', icone: '📚' },
   { n: '03', titulo: 'Formalização', desc: 'Apoio técnico para legalização e institucionalização das associações mapeadas pelo projeto.', icone: '📋' },
   { n: '04', titulo: 'Assessoria', desc: 'Acompanhamento contínuo e assessoria pós-formalização para garantir a sustentabilidade das associações.', icone: '🤝' },
@@ -162,7 +162,15 @@ export default function Home() {
           </p>
           <div className="flex items-center justify-center gap-1.5 mt-2 text-blue-300 text-sm">
             <MapPin className="w-4 h-4" />
-            <span>Bom Jesus da Lapa · Serra do Ramalho · Paratinga · Riacho de Santana — BA</span>
+            <span>Bom Jesus da Lapa · Sítio do Mato · Serra do Ramalho · Paratinga · Riacho de Santana — BA</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 mt-2 text-xs text-blue-300 flex-wrap">
+            <span>Coordenação: <strong className="text-blue-100">Profa. Dra. Deyse Queirós Santos</strong></span>
+            <span>·</span>
+            <a href="https://www.instagram.com/deyse42/" target="_blank" rel="noreferrer"
+              className="flex items-center gap-1 text-pink-300 hover:text-pink-200 transition-colors">
+              📷 @deyse42
+            </a>
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <a href="#associacoes"
@@ -338,7 +346,7 @@ export default function Home() {
                   <p>
                     As Associações são uma alternativa à inserção de pessoas no mundo do trabalho. O projeto de extensão
                     <strong className="text-blue-700"> Usina do Sol</strong> tem como objetivo capacitar e formalizar as associações
-                    das cidades de <strong>Bom Jesus da Lapa, Serra do Ramalho, Paratinga e Riacho de Santana</strong>.
+                    das cidades de <strong>Bom Jesus da Lapa, Sítio do Mato, Serra do Ramalho, Paratinga e Riacho de Santana</strong>.
                   </p>
                   <p>
                     O projeto levará, por meio de cursos e oficinas de capacitação, o aprendizado prático dos processos
@@ -374,7 +382,7 @@ export default function Home() {
               <Users className="w-8 h-8 mx-auto mb-3 text-yellow-300" />
               <h4 className="font-bold text-lg mb-2">Público</h4>
               <p className="text-green-100 text-sm leading-relaxed">
-                Associações dos municípios de Bom Jesus da Lapa, Serra do Ramalho, Paratinga e Riacho de Santana — BA.
+                Associações dos municípios de Bom Jesus da Lapa, Sítio do Mato, Serra do Ramalho, Paratinga e Riacho de Santana — BA.
               </p>
             </div>
             <div className="bg-rose-600 text-white rounded-2xl p-6 text-center">
@@ -441,6 +449,14 @@ export default function Home() {
             <p className="text-xs text-gray-500">🌞 Tecnologia a serviço da economia solidária e da cultura popular</p>
             <p className="text-sm font-semibold text-gray-300">
               © 2026 Prof. Me. Ramon Santos Costa. Todos os direitos reservados.
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Coordenação: <span className="text-gray-300">Profa. Dra. Deyse Queirós Santos</span>
+              {' · '}
+              <a href="https://www.instagram.com/deyse42/" target="_blank" rel="noreferrer"
+                className="text-pink-400 hover:text-pink-300 transition-colors">
+                📷 @deyse42
+              </a>
             </p>
             <p className="text-xs text-gray-600">
               Universidade do Estado da Bahia — UNEB · Projeto de Extensão Usina do Sol
