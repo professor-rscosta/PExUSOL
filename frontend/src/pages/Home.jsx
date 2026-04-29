@@ -164,12 +164,21 @@ export default function Home() {
             <MapPin className="w-4 h-4" />
             <span>Bom Jesus da Lapa · Sítio do Mato · Serra do Ramalho · Paratinga · Riacho de Santana — BA</span>
           </div>
-          <div className="flex items-center justify-center gap-2 mt-2 text-xs text-blue-300 flex-wrap">
-            <span>Coordenação: <strong className="text-blue-100">Profa. Dra. Deyse Queirós Santos</strong></span>
-            <span>·</span>
-            <a href="https://www.instagram.com/deyse42/" target="_blank" rel="noreferrer"
-              className="flex items-center gap-1 text-pink-300 hover:text-pink-200 transition-colors">
-              📷 @deyse42
+          <div className="flex items-center justify-center gap-3 mt-3 flex-wrap">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5">
+              <span className="text-xs text-blue-200">Coordenação</span>
+              <span className="text-xs font-semibold text-white">Profa. Dra. Deyse Queirós Santos</span>
+            </div>
+            <a
+              href="https://www.instagram.com/deyse42/"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-all shadow-lg hover:shadow-pink-500/30 hover:scale-105"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+              @deyse42
             </a>
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -450,14 +459,23 @@ export default function Home() {
             <p className="text-sm font-semibold text-gray-300">
               © 2026 Prof. Me. Ramon Santos Costa. Todos os direitos reservados.
             </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Coordenação: <span className="text-gray-300">Profa. Dra. Deyse Queirós Santos</span>
-              {' · '}
-              <a href="https://www.instagram.com/deyse42/" target="_blank" rel="noreferrer"
-                className="text-pink-400 hover:text-pink-300 transition-colors">
-                📷 @deyse42
+            <div className="flex items-center justify-center gap-3 flex-wrap mt-2">
+              <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-full px-4 py-1.5">
+                <span className="text-xs text-gray-400">Coordenação</span>
+                <span className="text-xs font-semibold text-gray-200">Profa. Dra. Deyse Queirós Santos</span>
+              </div>
+              <a
+                href="https://www.instagram.com/deyse42/"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 bg-gradient-to-r from-pink-600 to-purple-700 hover:from-pink-500 hover:to-purple-600 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-all shadow-lg hover:scale-105"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+                @deyse42
               </a>
-            </p>
+            </div>
             <p className="text-xs text-gray-600">
               Universidade do Estado da Bahia — UNEB · Projeto de Extensão Usina do Sol
             </p>
