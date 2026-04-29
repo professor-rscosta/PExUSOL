@@ -172,6 +172,7 @@ export default function LojaEmpresa() {
                 key={produto.id}
                 produto={produto}
                 onAdicionar={() => handleAdicionar(produto)}
+              empresaSlug={slug}
                 noCarrinho={noCarrinho(produto.id)}
               />
             ))}
@@ -182,10 +183,10 @@ export default function LojaEmpresa() {
   )
 }
 
-function ProdutoCard({ produto, onAdicionar, noCarrinho }) {
+function ProdutoCard({ produto, onAdicionar, noCarrinho, empresaSlug }) {
   return (
     <div className="card group animate-fadeIn">
-      <Link to={`/empresa/${slug}/produto/${produto.id}`}>
+      <Link to={`/empresa/${empresaSlug}/produto/${produto.id}`}>
         <div className="aspect-square bg-gray-100 overflow-hidden">
           {produto.imagem ? (
             <img
