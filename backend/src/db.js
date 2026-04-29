@@ -1,10 +1,15 @@
 // src/db.js — Pool de conexão MySQL (sem Prisma/Rust)
 const mysql = require('mysql2/promise');
 
-const pool = mysql.createPool({
-  uri: process.env.DATABASE_URL,
-  waitForConnections: true,
-  connectionLimit: 10,
-});
+if (!process.env.DATABASE_URL) {
+  console.error('❌ DATABASE_URL não definida!');
+}
+
+const pool = mysql.createPool(process.env.DATABASE_URL || '');
+
+// Testa a conexão ao carregar
+pool.query('SELECT 1')
+  .then(() => console.log('✅ Pool MySQL OK'))
+  .catch(e => console.error('❌ Pool MySQL erro:', e.message));
 
 module.exports = pool;

@@ -3,12 +3,12 @@ const path = require('path');
 const fs   = require('fs');
 
 const listar = async (req, res) => {
-  const [rows] = await db.query(`
-    SELECT e.*, 
-      (SELECT COUNT(*) FROM produtos p WHERE p.empresaId=e.id) as totalProdutos,
-      (SELECT COUNT(*) FROM pedidos pd WHERE pd.empresaId=e.id) as totalPedidos,
-      (SELECT COUNT(*) FROM usuarios u WHERE u.empresaId=e.id) as totalUsuarios
-    FROM empresas e WHERE e.ativo=1 ORDER BY e.nome`);
+  const [rows] = await db.query('SELECT * FROM empresas WHERE ativo=1 ORDER BY nome');
+  // Busca contagens separadas para cada empresa
+  for (const e of rows) {
+    const [[p]] = await db.query('SELECT COUNT(*) as c FROM produtos WHERE empresaId=? AND ativo=1', [e.id]);
+    e._count = { produtos: p.c };
+  }
   res.json(rows);
 };
 
