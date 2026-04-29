@@ -83,3 +83,10 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+// Testar conexão ao iniciar
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
+prisma.$connect()
+  .then(() => console.log('✅ Banco conectado!'))
+  .catch(e => console.error('❌ Banco erro:', e.message))
