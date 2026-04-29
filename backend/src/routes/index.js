@@ -76,7 +76,7 @@ router.get('/vendedor/pedidos', autenticar, (req, res, next) => {
   next();
 }, pedidoCtrl.listarPorEmpresa);
 
-router.get('/admin/pedidos/:empresaId', autenticar, apenasAdmin, pedidoCtrl.listarPorEmpresa);
+router.get('/admin/pedidos/:empresaId', autenticar, apenasAdmin, pedidoCtrl.listarPorId);
 router.get('/pedidos/:id', autenticar, pedidoCtrl.buscarPorId);
 router.put('/pedidos/:id/status', autenticar, pedidoCtrl.atualizarStatus);
 router.patch('/pedidos/:id/status', autenticar, pedidoCtrl.atualizarStatus);

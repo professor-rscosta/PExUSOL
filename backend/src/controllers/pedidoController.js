@@ -103,4 +103,26 @@ const dashboardGlobal = async (req, res) => {
   res.json({ ...tot, ...prods, ...emps, ranking });
 };
 
-module.exports = { criar, listarPorEmpresa, buscarPorId, atualizarStatus, relatorio, dashboardGlobal };
+
+const listarPorId = async (req, res) => {
+  const { empresaId } = req.params;
+  const { status, pagina=1, limite=20 } = req.query;
+  let q = 'SELECT * FROM pedidos WHERE empresaId=?';
+  const params = [empresaId];
+  if (status) { q += ' AND status=?'; params.push(status); }
+  const [[{total}]] = await db.query(q.replace('SELECT *','SELECT COUNT(*) as total'), params);
+  q += ' ORDER BY createdAt DESC LIMIT ? OFFSET ?';
+  params.push(Number(limite), (Number(pagina)-1)*Number(limite));
+  const [rows] = await db.query(q, params);
+  // Busca itens de cada pedido
+  for (const p of rows) {
+    const [itens] = await db.query(
+      'SELECT i.*, prod.nome as nomeProduto FROM itens_pedido i LEFT JOIN produtos prod ON i.produtoId=prod.id WHERE i.pedidoId=?',
+      [p.id]
+    );
+    p.itens = itens;
+  }
+  res.json({ pedidos: rows, total, totalPaginas: Math.ceil(total/limite), pagina: Number(pagina) });
+};
+
+module.exports = { criar, listarPorEmpresa, listarPorId, buscarPorId, atualizarStatus, relatorio, dashboardGlobal };
