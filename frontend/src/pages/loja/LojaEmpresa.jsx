@@ -187,15 +187,15 @@ function ProdutoCard({ produto, onAdicionar, noCarrinho, empresaSlug }) {
   return (
     <div className="card group animate-fadeIn">
       <Link to={`/empresa/${empresaSlug}/produto/${produto.id}`}>
-        <div className="aspect-square bg-gray-100 overflow-hidden">
+        <div className="aspect-square bg-white overflow-hidden flex items-center justify-center p-2">
           {produto.imagem ? (
             <img
               src={getImagemUrl(produto.imagem)}
               alt={produto.nome}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl">
+            <div className="w-full h-full flex items-center justify-center text-4xl bg-gray-50">
               {produto.categoria?.icone || '📦'}
             </div>
           )}

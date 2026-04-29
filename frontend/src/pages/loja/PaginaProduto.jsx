@@ -46,9 +46,9 @@ export default function PaginaProduto() {
         </Link>
 
         <div className="card overflow-hidden">
-          <div className="aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
+          <div className="aspect-video bg-white flex items-center justify-center overflow-hidden">
             {produto.imagem ? (
-              <img src={getImagemUrl(produto.imagem)} alt={produto.nome} className="w-full h-full object-cover" />
+              <img src={getImagemUrl(produto.imagem)} alt={produto.nome} className="w-full h-full object-contain" />
             ) : (
               <span className="text-6xl">{produto.categoria?.icone || '📦'}</span>
             )}
@@ -70,7 +70,7 @@ export default function PaginaProduto() {
 
             {produto.estoque > 0 ? (
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-1.5">
+                <div className="flex items-center gap-2 bg-white rounded-xl p-1.5">
                   <button onClick={() => setQtd(Math.max(1, qtd - 1))} className="w-9 h-9 rounded-lg bg-white flex items-center justify-center">
                     <Minus className="w-4 h-4" />
                   </button>
