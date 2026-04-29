@@ -41,7 +41,8 @@ export const STATUS_PEDIDO = {
 
 export const gerarMensagemWhatsApp = (
   pedido, itens, tipoEntrega, endereco, observacao,
-  clienteNome = '', clienteTelefone = '', empresaNome = ''
+  clienteNome = '', clienteTelefone = '', empresaNome = '',
+  baseUrl = 'https://www.pexusol.rscacademy.com.br'
 ) => {
   const protocolo = pedido || ('PED-' + new Date().getFullYear() + '-XXXX')
   const dataHora = new Intl.DateTimeFormat('pt-BR', {
@@ -54,55 +55,56 @@ export const gerarMensagemWhatsApp = (
   const listaItens = itens
     .map((i, idx) =>
       '  ' + (idx + 1) + '. ' + i.nome + '\n' +
-      '     ' + i.quantidade + 'x de ' + formatarMoeda(i.preco) + ' = *' + formatarMoeda(i.preco * i.quantidade) + '*'
+      '     ' + i.quantidade + 'x de ' + formatarMoeda(i.preco) + ' = ' + formatarMoeda(i.preco * i.quantidade)
     )
     .join('\n')
 
   const L1 = '================================'
   const L2 = '--------------------------------'
+  const trackUrl = baseUrl + '/rastrear/' + protocolo
 
   let m = ''
-  m += '*[ USINA DO SOL ]*\n'
-  m += '*Plataforma de Associacoes - UNEB*\n'
+  m += '*[ USINA DO SOL ]*' + '\n'
+  m += '_Plataforma de Associacoes - UNEB_' + '\n'
   m += L1 + '\n'
   m += '\n'
 
   if (empresaNome) {
-    m += '*Associacao*\n'
+    m += '*Associacao*' + '\n'
     m += empresaNome + '\n'
     m += L2 + '\n'
     m += '\n'
   }
 
-  m += '*CLIENTE*\n'
-  m += 'Nome...: *' + (clienteNome || 'Nao informado') + '*\n'
+  m += '*CLIENTE*' + '\n'
+  m += 'Nome...: *' + (clienteNome || 'Nao informado') + '*' + '\n'
   if (clienteTelefone) {
-    m += 'Fone...: *' + clienteTelefone + '*\n'
+    m += 'Fone...: *' + clienteTelefone + '*' + '\n'
   }
   m += '\n'
 
-  m += '*PEDIDO*\n'
-  m += 'Protocolo: *' + protocolo + '*\n'
+  m += '*PEDIDO*' + '\n'
+  m += 'Protocolo: *' + protocolo + '*' + '\n'
   m += 'Data/Hora: ' + dataHora + '\n'
   m += '\n'
 
-  m += '*ITENS*\n'
+  m += '*ITENS*' + '\n'
   m += L2 + '\n'
   m += listaItens + '\n'
   m += L2 + '\n'
   m += '\n'
 
   m += L1 + '\n'
-  m += '*TOTAL: ' + formatarMoeda(total) + '*\n'
+  m += '*TOTAL: ' + formatarMoeda(total) + '*' + '\n'
   m += L1 + '\n'
   m += '\n'
 
-  m += '*ENTREGA*\n'
+  m += '*ENTREGA*' + '\n'
   if (tipoEntrega === 'ENTREGA') {
-    m += 'Tipo...: Entrega no endereco\n'
-    if (endereco) m += 'Local..: *' + endereco + '*\n'
+    m += 'Tipo...: Entrega no endereco' + '\n'
+    if (endereco) m += 'Local..: *' + endereco + '*' + '\n'
   } else {
-    m += 'Tipo...: Retirada na loja\n'
+    m += 'Tipo...: Retirada na loja' + '\n'
   }
 
   if (observacao) {
@@ -111,8 +113,14 @@ export const gerarMensagemWhatsApp = (
 
   m += '\n'
   m += L1 + '\n'
-  m += '_Pedido realizado pelo site Usina do Sol._\n'
-  m += '_Aguardo confirmacao. Obrigado!_'
+  m += '_Pedido realizado pelo site Usina do Sol._' + '\n'
+  m += '_Aguardo confirmacao. Obrigado!_' + '\n'
+  m += '\n'
+  m += L2 + '\n'
+  m += '*ACOMPANHE SEU PEDIDO:*' + '\n'
+  m += trackUrl + '\n'
+  m += '_Clique no link acima para ver o status em tempo real_' + '\n'
+  m += L2
 
   return encodeURIComponent(m)
 }
