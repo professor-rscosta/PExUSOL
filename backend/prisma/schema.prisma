@@ -1,4 +1,174 @@
+// ============================================================
+// SCHEMA PRISMA — USINA DO SOL
+// Sistema Multiempresa — UNEB / Velho Chico
+// ============================================================
+
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-3.0.x", "linux-musl"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+  binaryTargets   = ["native", "rhel-openssl-3.0.x", "linux-musl"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────
+// USUÁRIOS (Admin + Vendedor)
+// ─────────────────────────────────────
+model Usuario {
+  id        Int       @id @default(autoincrement())
+  nome      String    @db.VarChar(150)
+  email     String    @unique @db.VarChar(200)
+  senha     String    @db.VarChar(255)
+  role      Role      @default(VENDEDOR)
+  ativo     Boolean   @default(true)
+  cpf       String?   @unique @db.VarChar(14)
+  telefone  String?   @db.VarChar(20)
+  endereco  Endereco?
+  empresaId Int?
+  empresa   Empresa?  @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("usuarios")
+}
+
+enum Role {
+  ADMIN
+  VENDEDOR
+}
+
+// ─────────────────────────────────────
+// EMPRESAS / ASSOCIAÇÕES
+// ─────────────────────────────────────
+model Empresa {
+  id          Int       @id @default(autoincrement())
+  nome        String    @db.VarChar(200)
+  slug        String    @unique @db.VarChar(100)
+  descricao   String?   @db.Text
+  whatsapp    String    @db.VarChar(20)
+  logo        String?   @db.VarChar(500)
+  banner      String?   @db.VarChar(500)
+  site        String?   @db.VarChar(300)
+  endereco    String?   @db.VarChar(300)
+  cidade      String?   @db.VarChar(100)
+  ativo       Boolean   @default(true)
+  usuarios    Usuario[]
+  produtos    Produto[]
+  pedidos     Pedido[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("empresas")
+}
+
+// ─────────────────────────────────────
+// CATEGORIAS
+// ─────────────────────────────────────
+model Categoria {
+  id        Int       @id @default(autoincrement())
+  nome      String    @unique @db.VarChar(100)
+  descricao String?   @db.VarChar(300)
+  icone     String?   @db.VarChar(10)
+  produtos  Produto[]
+  createdAt DateTime  @default(now())
+
+  @@map("categorias")
+}
+
+// ─────────────────────────────────────
+// PRODUTOS
+// ─────────────────────────────────────
+model Produto {
+  id          Int          @id @default(autoincrement())
+  nome        String       @db.VarChar(200)
+  descricao   String?      @db.Text
+  preco       Decimal      @db.Decimal(10, 2)
+  imagem      String?      @db.VarChar(500)
+  estoque     Int          @default(0)
+  unidade     String       @default("un") @db.VarChar(20)
+  ativo       Boolean      @default(true)
+  empresaId   Int
+  empresa     Empresa      @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  categoriaId Int?
+  categoria   Categoria?   @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
+  itensPedido ItemPedido[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([nome, empresaId])
+  @@map("produtos")
+}
+
+// ─────────────────────────────────────
+// PEDIDOS
+// ─────────────────────────────────────
+model Pedido {
+  id              Int          @id @default(autoincrement())
+  protocolo       String       @unique @db.VarChar(20)
+  clienteNome     String       @db.VarChar(150)
+  clienteTelefone String?      @db.VarChar(20)
+  clienteEndereco String?      @db.VarChar(300)
+  tipoEntrega     TipoEntrega  @default(RETIRADA)
+  observacao      String?      @db.Text
+  status          StatusPedido @default(PENDENTE)
+  total           Decimal      @db.Decimal(10, 2)
+  empresaId       Int
+  empresa         Empresa      @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  itens           ItemPedido[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("pedidos")
+}
+
+enum TipoEntrega {
+  RETIRADA
+  ENTREGA
+}
+
+enum StatusPedido {
+  PENDENTE
+  CONFIRMADO
+  PREPARANDO
+  ENVIADO
+  ENTREGUE
+  CANCELADO
+}
+
+// ─────────────────────────────────────
+// ITENS DO PEDIDO
+// ─────────────────────────────────────
+model ItemPedido {
+  id         Int     @id @default(autoincrement())
+  pedidoId   Int
+  pedido     Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produtoId  Int
+  produto    Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  quantidade Int
+  preco      Decimal @db.Decimal(10, 2)
+
+  @@map("itens_pedido")
+}
+
+// ─────────────────────────────────────
+// ENDEREÇOS DOS USUÁRIOS
+// ─────────────────────────────────────
+model Endereco {
+  id          Int      @id @default(autoincrement())
+  usuarioId   Int      @unique
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  logradouro  String   @db.VarChar(200)
+  numero      String   @db.VarChar(20)
+  complemento String?  @db.VarChar(100)
+  bairro      String   @db.VarChar(100)
+  cep         String   @db.VarChar(9)
+  cidade      String   @db.VarChar(100)
+  estado      String   @db.Char(2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("enderecos")
 }

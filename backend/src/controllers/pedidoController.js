@@ -1,345 +1,106 @@
-// controllers/pedidoController.js
-const { PrismaClient } = require('@prisma/client');
+const db = require('../db');
 
-const prisma = new PrismaClient();
-
-// ─── GERAR PROTOCOLO ──────────────────────────────────────
 const gerarProtocolo = async () => {
   const ano = new Date().getFullYear();
-  const ultimo = await prisma.pedido.findFirst({
-    where: { protocolo: { startsWith: `PED-${ano}-` } },
-    orderBy: { id: 'desc' },
-  });
-
-  let seq = 1;
-  if (ultimo) {
-    const partes = ultimo.protocolo.split('-');
-    seq = parseInt(partes[2]) + 1;
-  }
-
-  return `PED-${ano}-${String(seq).padStart(4, '0')}`;
+  const [[r]] = await db.query("SELECT COUNT(*) as c FROM pedidos WHERE YEAR(criadoEm)=?", [ano]);
+  const num = String(r.c + 1).padStart(4, '0');
+  return `PED-${ano}-${num}`;
 };
 
-// ─── CRIAR PEDIDO (PÚBLICO) ───────────────────────────────
 const criar = async (req, res) => {
   const { slug } = req.params;
   const { clienteNome, clienteTelefone, clienteEndereco, tipoEntrega, observacao, itens } = req.body;
-
-  if (!clienteNome || !itens || itens.length === 0) {
-    return res.status(400).json({ erro: 'Nome do cliente e itens são obrigatórios' });
-  }
-
-  const empresa = await prisma.empresa.findUnique({ where: { slug } });
-  if (!empresa || !empresa.ativo) {
-    return res.status(404).json({ erro: 'Empresa não encontrada' });
-  }
-
-  // Valida e calcula itens
+  if (!clienteNome||!itens?.length) return res.status(400).json({ erro: 'Nome e itens obrigatórios' });
+  const [emp] = await db.query('SELECT id,whatsapp FROM empresas WHERE slug=? AND ativo=1', [slug]);
+  if (!emp[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
+  
   let total = 0;
-  const itensValidados = [];
-
+  const itensValidos = [];
   for (const item of itens) {
-    const produto = await prisma.produto.findUnique({ where: { id: Number(item.produtoId) } });
-
-    if (!produto || !produto.ativo || produto.empresaId !== empresa.id) {
-      return res.status(400).json({ erro: `Produto inválido: ${item.produtoId}` });
-    }
-
-    if (produto.estoque < item.quantidade) {
-      return res.status(400).json({ erro: `Estoque insuficiente para: ${produto.nome}` });
-    }
-
-    itensValidados.push({
-      produtoId: produto.id,
-      quantidade: Number(item.quantidade),
-      preco: produto.preco,
-    });
-
-    total += Number(produto.preco) * Number(item.quantidade);
+    const [p] = await db.query('SELECT id,preco,estoque,nome FROM produtos WHERE id=? AND ativo=1', [item.produtoId]);
+    if (!p[0]) return res.status(400).json({ erro: `Produto ${item.produtoId} não encontrado` });
+    if (p[0].estoque < item.quantidade) return res.status(400).json({ erro: `Estoque insuficiente: ${p[0].nome}` });
+    total += Number(p[0].preco) * item.quantidade;
+    itensValidos.push({ ...item, preco: p[0].preco, nomeProduto: p[0].nome });
   }
 
   const protocolo = await gerarProtocolo();
-
-  const pedido = await prisma.pedido.create({
-    data: {
-      protocolo,
-      clienteNome: clienteNome.trim(),
-      clienteTelefone: clienteTelefone?.replace(/\D/g, ''),
-      clienteEndereco: tipoEntrega === 'ENTREGA' ? clienteEndereco : null,
-      tipoEntrega: tipoEntrega || 'RETIRADA',
-      observacao,
-      total,
-      empresaId: empresa.id,
-      itens: {
-        create: itensValidados,
-      },
-    },
-    include: {
-      itens: { include: { produto: true } },
-      empresa: true,
-    },
-  });
-
-  // Atualiza estoque
-  for (const item of itensValidados) {
-    await prisma.produto.update({
-      where: { id: item.produtoId },
-      data: { estoque: { decrement: item.quantidade } },
-    });
-  }
-
-  res.status(201).json(pedido);
-};
-
-// ─── LISTAR PEDIDOS DA EMPRESA (VENDEDOR) ────────────────
-const listarPorEmpresa = async (req, res) => {
-  const empresaId = req.usuario.role === 'ADMIN'
-    ? Number(req.params.empresaId)
-    : req.usuario.empresaId;
-
-  const { status, dataInicio, dataFim, pagina = 1, limite = 20 } = req.query;
-
-  const where = {
-    empresaId,
-    ...(status && { status }),
-    ...(dataInicio && dataFim && {
-      createdAt: {
-        gte: new Date(dataInicio),
-        lte: new Date(dataFim + 'T23:59:59'),
-      },
-    }),
-  };
-
-  const skip = (Number(pagina) - 1) * Number(limite);
-
-  const [pedidos, total] = await Promise.all([
-    prisma.pedido.findMany({
-      where,
-      include: {
-        itens: { include: { produto: { select: { nome: true, imagem: true } } } },
-      },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: Number(limite),
-    }),
-    prisma.pedido.count({ where }),
-  ]);
-
-  res.json({
-    pedidos,
-    total,
-    pagina: Number(pagina),
-    totalPaginas: Math.ceil(total / Number(limite)),
-  });
-};
-
-// ─── BUSCAR PEDIDO POR ID ─────────────────────────────────
-const buscarPorId = async (req, res) => {
-  const { id } = req.params;
-
-  const pedido = await prisma.pedido.findUnique({
-    where: { id: Number(id) },
-    include: {
-      itens: { include: { produto: true } },
-      empresa: true,
-    },
-  });
-
-  if (!pedido) return res.status(404).json({ erro: 'Pedido não encontrado' });
-
-  // Vendedor só vê pedidos da própria empresa
-  if (req.usuario.role === 'VENDEDOR' && pedido.empresaId !== req.usuario.empresaId) {
-    return res.status(403).json({ erro: 'Sem permissão' });
-  }
-
-  res.json(pedido);
-};
-
-// ─── ATUALIZAR STATUS ─────────────────────────────────────
-const atualizarStatus = async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-
-  const statusValidos = ['PENDENTE', 'CONFIRMADO', 'PREPARANDO', 'ENVIADO', 'ENTREGUE', 'CANCELADO'];
-  if (!statusValidos.includes(status)) {
-    return res.status(400).json({ erro: 'Status inválido' });
-  }
-
-  const pedido = await prisma.pedido.findUnique({ where: { id: Number(id) } });
-  if (!pedido) return res.status(404).json({ erro: 'Pedido não encontrado' });
-
-  if (req.usuario.role === 'VENDEDOR' && pedido.empresaId !== req.usuario.empresaId) {
-    return res.status(403).json({ erro: 'Sem permissão' });
-  }
-
-  // Se cancelado, devolve estoque
-  if (status === 'CANCELADO' && pedido.status !== 'CANCELADO') {
-    const itens = await prisma.itemPedido.findMany({ where: { pedidoId: Number(id) } });
-    for (const item of itens) {
-      await prisma.produto.update({
-        where: { id: item.produtoId },
-        data: { estoque: { increment: item.quantidade } },
-      });
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [r] = await conn.query(
+      'INSERT INTO pedidos (protocolo,clienteNome,clienteTelefone,clienteEndereco,tipoEntrega,observacao,total,empresaId,status) VALUES (?,?,?,?,?,?,?,?,?)',
+      [protocolo, clienteNome, clienteTelefone||null, clienteEndereco||null, tipoEntrega||'RETIRADA', observacao||null, total, emp[0].id, 'PENDENTE']
+    );
+    const pedidoId = r.insertId;
+    for (const item of itensValidos) {
+      await conn.query('INSERT INTO itens_pedido (pedidoId,produtoId,quantidade,preco) VALUES (?,?,?,?)', [pedidoId, item.produtoId, item.quantidade, item.preco]);
+      await conn.query('UPDATE produtos SET estoque=estoque-? WHERE id=?', [item.quantidade, item.produtoId]);
     }
+    await conn.commit();
+    res.status(201).json({ id: pedidoId, protocolo, total, status: 'PENDENTE', whatsapp: emp[0].whatsapp, itens: itensValidos });
+  } catch(e) {
+    await conn.rollback();
+    throw e;
+  } finally { conn.release(); }
+};
+
+const listarPorEmpresa = async (req, res) => {
+  const { slug } = req.params;
+  const { status, pagina=1, limite=10 } = req.query;
+  const [emp] = await db.query('SELECT id FROM empresas WHERE slug=?', [slug]);
+  if (!emp[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
+  let q = 'SELECT * FROM pedidos WHERE empresaId=?';
+  const params = [emp[0].id];
+  if (status) { q += ' AND status=?'; params.push(status); }
+  const [[{total}]] = await db.query(q.replace('SELECT *','SELECT COUNT(*) as total'), params);
+  q += ' ORDER BY criadoEm DESC LIMIT ? OFFSET ?';
+  params.push(Number(limite), (Number(pagina)-1)*Number(limite));
+  const [rows] = await db.query(q, params);
+  res.json({ pedidos: rows, total, totalPaginas: Math.ceil(total/limite), pagina: Number(pagina) });
+};
+
+const buscarPorId = async (req, res) => {
+  const [rows] = await db.query('SELECT * FROM pedidos WHERE id=?', [req.params.id]);
+  if (!rows[0]) return res.status(404).json({ erro: 'Pedido não encontrado' });
+  const [itens] = await db.query('SELECT i.*, p.nome as nomeProduto, i.quantidade*i.preco as subtotal FROM itens_pedido i LEFT JOIN produtos p ON i.produtoId=p.id WHERE i.pedidoId=?', [req.params.id]);
+  res.json({ ...rows[0], itens });
+};
+
+const atualizarStatus = async (req, res) => {
+  const { status } = req.body;
+  const { id } = req.params;
+  const [rows] = await db.query('SELECT * FROM pedidos WHERE id=?', [id]);
+  if (!rows[0]) return res.status(404).json({ erro: 'Pedido não encontrado' });
+  if (status === 'CANCELADO' && rows[0].status !== 'CANCELADO') {
+    const [itens] = await db.query('SELECT * FROM itens_pedido WHERE pedidoId=?', [id]);
+    for (const item of itens) await db.query('UPDATE produtos SET estoque=estoque+? WHERE id=?', [item.quantidade, item.produtoId]);
   }
-
-  const atualizado = await prisma.pedido.update({
-    where: { id: Number(id) },
-    data: { status },
-    include: { itens: { include: { produto: true } } },
-  });
-
-  res.json(atualizado);
+  await db.query('UPDATE pedidos SET status=? WHERE id=?', [status, id]);
+  res.json({ mensagem: 'Status atualizado', status });
 };
 
-// ─── RELATÓRIO DE VENDAS ──────────────────────────────────
 const relatorio = async (req, res) => {
-  const empresaId = req.usuario.role === 'ADMIN'
-    ? Number(req.params.empresaId || 0)
-    : req.usuario.empresaId;
-
+  const { slug } = req.params;
   const { dataInicio, dataFim } = req.query;
-
-  const hoje = new Date();
-  const inicio = dataInicio ? new Date(dataInicio) : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  const fim = dataFim ? new Date(dataFim + 'T23:59:59') : hoje;
-
-  const whereBase = {
-    ...(empresaId && { empresaId }),
-    createdAt: { gte: inicio, lte: fim },
-    status: { notIn: ['CANCELADO'] },
-  };
-
-  const [
-    totalPedidos,
-    receita,
-    porStatus,
-    produtosMaisVendidos,
-    pedidosPorDia,
-  ] = await Promise.all([
-    prisma.pedido.count({ where: whereBase }),
-
-    prisma.pedido.aggregate({
-      where: whereBase,
-      _sum: { total: true },
-    }),
-
-    prisma.pedido.groupBy({
-      by: ['status'],
-      where: { ...(empresaId && { empresaId }), createdAt: { gte: inicio, lte: fim } },
-      _count: { status: true },
-    }),
-
-    prisma.itemPedido.groupBy({
-      by: ['produtoId'],
-      where: {
-        pedido: whereBase,
-      },
-      _sum: { quantidade: true },
-      orderBy: { _sum: { quantidade: 'desc' } },
-      take: 5,
-    }).then(async (items) => {
-      return Promise.all(
-        items.map(async (item) => {
-          const produto = await prisma.produto.findUnique({
-            where: { id: item.produtoId },
-            select: { nome: true, imagem: true },
-          });
-          return { ...produto, quantidade: item._sum.quantidade };
-        })
-      );
-    }),
-
-    prisma.$queryRaw`
-      SELECT DATE(createdAt) as data, COUNT(*) as pedidos, SUM(total) as receita
-      FROM pedidos
-      WHERE empresaId = ${empresaId || 0} OR ${!empresaId}
-        AND createdAt >= ${inicio}
-        AND createdAt <= ${fim}
-        AND status != 'CANCELADO'
-      GROUP BY DATE(createdAt)
-      ORDER BY data
-    `.catch(() => []),
-  ]);
-
-  res.json({
-    periodo: { inicio, fim },
-    totalPedidos,
-    receita: receita._sum.total || 0,
-    porStatus,
-    produtosMaisVendidos,
-    pedidosPorDia,
-  });
+  const [emp] = await db.query('SELECT id FROM empresas WHERE slug=?', [slug]);
+  if (!emp[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
+  const id = emp[0].id;
+  const di = dataInicio || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+  const df = dataFim || new Date().toISOString().split('T')[0];
+  const [[tot]] = await db.query("SELECT COUNT(*) as totalPedidos, COALESCE(SUM(total),0) as receitaTotal, COALESCE(AVG(total),0) as ticketMedio FROM pedidos WHERE empresaId=? AND status!='CANCELADO' AND DATE(criadoEm) BETWEEN ? AND ?", [id,di,df]);
+  const [[ti]] = await db.query("SELECT COALESCE(SUM(i.quantidade),0) as totalItens FROM itens_pedido i JOIN pedidos p ON i.pedidoId=p.id WHERE p.empresaId=? AND p.status!='CANCELADO' AND DATE(p.criadoEm) BETWEEN ? AND ?", [id,di,df]);
+  const [top] = await db.query("SELECT i.produtoId, prod.nome as nomeProduto, SUM(i.quantidade) as totalQuantidade, SUM(i.quantidade*i.preco) as totalReceita FROM itens_pedido i JOIN pedidos p ON i.pedidoId=p.id JOIN produtos prod ON i.produtoId=prod.id WHERE p.empresaId=? AND p.status!='CANCELADO' AND DATE(p.criadoEm) BETWEEN ? AND ? GROUP BY i.produtoId ORDER BY totalQuantidade DESC LIMIT 10", [id,di,df]);
+  const [byStatus] = await db.query("SELECT status, COUNT(*) as _count FROM pedidos WHERE empresaId=? AND DATE(criadoEm) BETWEEN ? AND ? GROUP BY status", [id,di,df]);
+  res.json({ ...tot, ...ti, produtosMaisVendidos: top, pedidosPorStatus: byStatus });
 };
 
-// ─── DASHBOARD GLOBAL (ADMIN) ─────────────────────────────
 const dashboardGlobal = async (req, res) => {
-  const hoje = new Date();
-  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-
-  const [
-    totalEmpresas,
-    totalProdutos,
-    totalPedidos,
-    pedidosMes,
-    receitaTotal,
-    receitaMes,
-    empresasRanking,
-  ] = await Promise.all([
-    prisma.empresa.count({ where: { ativo: true } }),
-    prisma.produto.count({ where: { ativo: true } }),
-    prisma.pedido.count(),
-    prisma.pedido.count({ where: { createdAt: { gte: inicioMes } } }),
-    prisma.pedido.aggregate({
-      where: { status: { notIn: ['CANCELADO'] } },
-      _sum: { total: true },
-    }),
-    prisma.pedido.aggregate({
-      where: {
-        createdAt: { gte: inicioMes },
-        status: { notIn: ['CANCELADO'] },
-      },
-      _sum: { total: true },
-    }),
-    prisma.pedido.groupBy({
-      by: ['empresaId'],
-      _count: { id: true },
-      _sum: { total: true },
-      orderBy: { _sum: { total: 'desc' } },
-      take: 5,
-    }).then(async (items) => {
-      return Promise.all(
-        items.map(async (item) => {
-          const empresa = await prisma.empresa.findUnique({
-            where: { id: item.empresaId },
-            select: { nome: true, slug: true },
-          });
-          return {
-            ...empresa,
-            pedidos: item._count.id,
-            receita: item._sum.total || 0,
-          };
-        })
-      );
-    }),
-  ]);
-
-  res.json({
-    totalEmpresas,
-    totalProdutos,
-    totalPedidos,
-    pedidosMes,
-    receitaTotal: receitaTotal._sum.total || 0,
-    receitaMes: receitaMes._sum.total || 0,
-    empresasRanking,
-  });
+  const [[tot]] = await db.query("SELECT COUNT(*) as totalPedidos, COALESCE(SUM(total),0) as receitaTotal FROM pedidos WHERE status!='CANCELADO'");
+  const [[prods]] = await db.query("SELECT COUNT(*) as totalProdutos FROM produtos WHERE ativo=1");
+  const [[emps]] = await db.query("SELECT COUNT(*) as totalEmpresas FROM empresas WHERE ativo=1");
+  const [ranking] = await db.query("SELECT e.nome, COUNT(p.id) as totalPedidos, COALESCE(SUM(p.total),0) as receita FROM empresas e LEFT JOIN pedidos p ON e.id=p.empresaId AND p.status!='CANCELADO' WHERE e.ativo=1 GROUP BY e.id ORDER BY receita DESC");
+  res.json({ ...tot, ...prods, ...emps, ranking });
 };
 
-module.exports = {
-  criar,
-  listarPorEmpresa,
-  buscarPorId,
-  atualizarStatus,
-  relatorio,
-  dashboardGlobal,
-};
+module.exports = { criar, listarPorEmpresa, buscarPorId, atualizarStatus, relatorio, dashboardGlobal };
