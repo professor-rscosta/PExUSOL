@@ -1,5 +1,5 @@
 import { useLocation, Link } from 'react-router-dom'
-import { CheckCircle, MessageCircle, Home } from 'lucide-react'
+import { CheckCircle, MessageCircle, Home, Package } from 'lucide-react'
 import { gerarMensagemWhatsApp } from '../../utils'
 
 export default function CheckoutSucesso() {
@@ -66,10 +66,19 @@ export default function CheckoutSucesso() {
           </a>
         </div>
 
-        <Link to="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-gray-600 text-sm">
-          <Home className="w-4 h-4" />
-          Voltar ao início
-        </Link>
+        <div className="flex flex-col items-center gap-3 mt-2">
+          <Link
+            to={'/rastrear/' + (pedido?.protocolo || '')}
+            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium border border-blue-200 hover:border-blue-400 rounded-xl px-4 py-2 transition-all"
+          >
+            <Package className="w-4 h-4" />
+            Acompanhar status do pedido
+          </Link>
+          <Link to="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-gray-600 text-sm">
+            <Home className="w-4 h-4" />
+            Voltar ao início
+          </Link>
+        </div>
       </div>
     </div>
   )

@@ -10,6 +10,7 @@ import LojaEmpresa from './pages/loja/LojaEmpresa'
 import PaginaProduto from './pages/loja/PaginaProduto'
 import Carrinho from './pages/loja/Carrinho'
 import CheckoutSucesso from './pages/loja/CheckoutSucesso'
+import RastrearPedido from './pages/loja/RastrearPedido'
 
 // Auth
 import Login from './pages/Login'
@@ -61,6 +62,8 @@ export default function App() {
             <Route path="/empresa/:slug/produto/:id" element={<PaginaProduto />} />
             <Route path="/carrinho" element={<Carrinho />} />
             <Route path="/pedido/sucesso" element={<CheckoutSucesso />} />
+            <Route path="/rastrear" element={<RastrearPedido />} />
+            <Route path="/rastrear/:protocolo" element={<RastrearPedido />} />
 
             {/* ADMIN */}
             <Route

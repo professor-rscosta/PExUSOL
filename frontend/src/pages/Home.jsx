@@ -138,6 +138,10 @@ export default function Home() {
               )}
             </Link>
 
+            <Link to="/rastrear" className="text-sm text-blue-200 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/10 flex items-center gap-1.5">
+              <span>🔍</span>
+              <span className="hidden sm:inline">Rastrear Pedido</span>
+            </Link>
             <Link to="/login" style={{display:'flex',alignItems:'center',gap:8,background:'#1a2f7a',color:'#ffffff',fontWeight:700,fontSize:13,padding:'8px 16px',borderRadius:10,textDecoration:'none',boxShadow:'0 2px 8px rgba(26,47,122,.25)'}}>
               <Lock size={15}/>
               <span>Área Reservada</span>

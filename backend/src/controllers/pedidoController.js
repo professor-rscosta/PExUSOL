@@ -125,4 +125,41 @@ const listarPorId = async (req, res) => {
   res.json({ pedidos: rows, total, totalPaginas: Math.ceil(total/limite), pagina: Number(pagina) });
 };
 
-module.exports = { criar, listarPorEmpresa, listarPorId, buscarPorId, atualizarStatus, relatorio, dashboardGlobal };
+
+const rastrear = async (req, res) => {
+  const { protocolo } = req.params;
+  const [rows] = await db.query(
+    `SELECT p.*, e.nome as empresaNome, e.whatsapp as empresaWhatsapp, e.logo as empresaLogo, e.slug as empresaSlug
+     FROM pedidos p LEFT JOIN empresas e ON p.empresaId = e.id
+     WHERE p.protocolo = ?`,
+    [protocolo.toUpperCase()]
+  );
+  if (!rows[0]) return res.status(404).json({ erro: 'Pedido não encontrado. Verifique o protocolo.' });
+  const pedido = rows[0];
+  const [itens] = await db.query(
+    `SELECT i.quantidade, i.preco, prod.nome as nomeProduto, prod.imagem
+     FROM itens_pedido i LEFT JOIN produtos prod ON i.produtoId = prod.id
+     WHERE i.pedidoId = ?`,
+    [pedido.id]
+  );
+  res.json({
+    protocolo: pedido.protocolo,
+    status: pedido.status,
+    tipoEntrega: pedido.tipoEntrega,
+    clienteNome: pedido.clienteNome,
+    total: pedido.total,
+    createdAt: pedido.createdAt,
+    updatedAt: pedido.updatedAt,
+    observacao: pedido.observacao,
+    clienteEndereco: pedido.clienteEndereco,
+    empresa: {
+      nome: pedido.empresaNome,
+      whatsapp: pedido.empresaWhatsapp,
+      logo: pedido.empresaLogo,
+      slug: pedido.empresaSlug,
+    },
+    itens,
+  });
+};
+
+module.exports = { criar, listarPorEmpresa, listarPorId, buscarPorId, atualizarStatus, relatorio, dashboardGlobal, rastrear };

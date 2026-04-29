@@ -64,6 +64,8 @@ router.delete('/produtos/:id', autenticar, produtoCtrl.excluir);
 // ═══════════════════════════════════════════════════════
 // Público — cliente cria pedido
 router.post('/empresa/:slug/pedidos', pedidoCtrl.criar);
+// Rastreamento público — sem auth
+router.get('/rastrear/:protocolo', pedidoCtrl.rastrear);
 
 // Slug-based (vendedor acessa pela URL com slug)
 router.get('/empresa/:slug/pedidos', autenticar, pedidoCtrl.listarPorEmpresa);
