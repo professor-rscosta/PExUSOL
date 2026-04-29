@@ -1,4 +1,3 @@
-// Carrega .env se existir (dev local) — produção usa variáveis do hPanel
 try { require('dotenv').config(); } catch(e) {}
 require('express-async-errors');
 
@@ -10,13 +9,16 @@ const routes  = require('./routes');
 
 const app = express();
 
+// Evita crash em erros não capturados
+process.on('uncaughtException', (err) => console.error('uncaughtException:', err.message));
+process.on('unhandledRejection', (reason) => console.error('unhandledRejection:', reason));
+
 app.use(cors({
   origin: [
     'https://pexusol.rscacademy.com.br',
     'https://www.pexusol.rscacademy.com.br',
     process.env.FRONTEND_URL,
     'http://localhost:5173',
-    'http://localhost:3000',
   ].filter(Boolean),
   credentials: true,
 }));
@@ -28,7 +30,16 @@ app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 const PUBLIC = path.join(__dirname, '..', 'public');
 app.use(express.static(PUBLIC));
 
-app.get('/status', (req, res) => res.json({ status: 'online', timestamp: new Date().toISOString() }));
+// Log todas as requisições
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    console.log(`${req.method} ${req.path}`);
+  }
+  next();
+});
+
+app.get('/ping', (req, res) => res.json({ pong: true }));
+app.get('/status', (req, res) => res.json({ status: 'online' }));
 app.use('/api', routes);
 
 app.get('*', (req, res) => {
@@ -38,7 +49,7 @@ app.get('*', (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error('Erro:', err.message);
+  console.error('Erro na rota', req.path, ':', err.message);
   if (err.name === 'JsonWebTokenError') return res.status(401).json({ erro: 'Token inválido' });
   if (err.name === 'TokenExpiredError') return res.status(401).json({ erro: 'Token expirado' });
   res.status(err.statusCode || 500).json({ erro: err.message || 'Erro interno' });

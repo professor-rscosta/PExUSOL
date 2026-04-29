@@ -3,6 +3,7 @@ const path = require('path');
 const fs   = require('fs');
 
 const listar = async (req, res) => {
+  console.log('GET /api/empresas chamado');
   const [rows] = await db.query('SELECT * FROM empresas WHERE ativo=1 ORDER BY nome');
   // Busca contagens separadas para cada empresa
   for (const e of rows) {
