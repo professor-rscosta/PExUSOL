@@ -49,14 +49,35 @@ export const gerarMensagemWhatsApp = (
     timeStyle: 'short',
   }).format(new Date())
 
-  const sep  = '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'
-  const sep2 = '\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550'
+  // Emojis gerados em RUNTIME via String.fromCodePoint
+  // Isso evita qualquer corrupcao pelo Vite/esbuild no build
+  const e = {
+    sol:     String.fromCodePoint(0x1F31E), // 🌞
+    loja:    String.fromCodePoint(0x1F3EA), // 🏬
+    cliente: String.fromCodePoint(0x1F464), // 👤
+    tel:     String.fromCodePoint(0x1F4F1), // 📱
+    pedido:  String.fromCodePoint(0x1F4CB), // 📋
+    proto:   String.fromCodePoint(0x1F516), // 🔖
+    data:    String.fromCodePoint(0x1F4C5), // 📅
+    itens:   String.fromCodePoint(0x1F6D2), // 🛒
+    total:   String.fromCodePoint(0x1F4B0), // 💰
+    entrega: String.fromCodePoint(0x1F69A), // 🚚
+    pin:     String.fromCodePoint(0x1F4CD), // 📍
+    obs:     String.fromCodePoint(0x1F4DD), // 📝
+    casa:    String.fromCodePoint(0x1F3E0), // 🏠
+    smile:   String.fromCodePoint(0x1F60A), // 😊
+    flor:    String.fromCodePoint(0x1F33B), // 🌻
+    ok:      String.fromCodePoint(0x2705),  // ✅
+  }
+
+  const sep  = '──────────────────────────────'
+  const sep2 = '══════════════════════════════'
 
   const listaItens = itens
     .map(function(i, idx) {
       return (
-        '   ' + (idx + 1) + '. *' + i.nome + '*\n' +
-        '       ' + i.quantidade + 'x \u00d7 ' + formatarMoeda(i.preco) +
+        '   ' + e.ok + ' *' + i.nome + '*\n' +
+        '       ' + i.quantidade + 'x × ' + formatarMoeda(i.preco) +
         ' = *' + formatarMoeda(i.preco * i.quantidade) + '*'
       )
     })
@@ -67,49 +88,47 @@ export const gerarMensagemWhatsApp = (
   }, 0)
 
   var msg = ''
-
-  msg += '\uD83C\uDF1E *USINA DO SOL \u2014 NOVO PEDIDO* \uD83C\uDF1E\n'
+  msg += e.sol + ' *USINA DO SOL — NOVO PEDIDO* ' + e.sol + '\n'
   msg += sep2 + '\n'
   if (empresaNome) {
-    msg += '\uD83C\uDFEA *' + empresaNome + '*\n'
+    msg += e.loja + ' *' + empresaNome + '*\n'
     msg += sep + '\n'
   }
   msg += '\n'
-  msg += '\uD83D\uDC64 *CLIENTE*\n'
-  msg += '   Nome: *' + (clienteNome || 'Nao informado') + '*\n'
+  msg += e.cliente + ' *CLIENTE*\n'
+  msg += '   Nome: *' + (clienteNome || 'Não informado') + '*\n'
   if (clienteTelefone) {
-    msg += '   \uD83D\uDCF1 Tel: *' + clienteTelefone + '*\n'
+    msg += '   ' + e.tel + ' Tel: *' + clienteTelefone + '*\n'
   }
   msg += '\n'
-  msg += '\uD83D\uDCCB *DADOS DO PEDIDO*\n'
-  msg += '   \uD83D\uDD16 Protocolo: *' + protocolo + '*\n'
-  msg += '   \uD83D\uDCC5 Data/Hora: ' + dataHora + '\n'
+  msg += e.pedido + ' *DADOS DO PEDIDO*\n'
+  msg += '   ' + e.proto + ' Protocolo: *' + protocolo + '*\n'
+  msg += '   ' + e.data  + ' Data/Hora: ' + dataHora + '\n'
   msg += '\n'
-  msg += '\uD83D\uDED2 *ITENS DO PEDIDO*\n'
+  msg += e.itens + ' *ITENS DO PEDIDO*\n'
   msg += sep + '\n'
   msg += listaItens + '\n'
   msg += sep + '\n'
   msg += '\n'
   msg += sep2 + '\n'
-  msg += '\uD83D\uDCB0 *TOTAL: ' + formatarMoeda(total) + '*\n'
+  msg += e.total + ' *TOTAL: ' + formatarMoeda(total) + '*\n'
   msg += sep2 + '\n'
   msg += '\n'
-  msg += '\uD83D\uDE9A *ENTREGA*\n'
+  msg += e.entrega + ' *ENTREGA*\n'
   if (tipoEntrega === 'ENTREGA') {
-    msg += '   \uD83C\uDFE0 Entrega no endere\u00e7o\n'
+    msg += '   ' + e.casa + ' Entrega no endereço\n'
     if (endereco) {
-      msg += '   \uD83D\uDCCD *' + endereco + '*\n'
+      msg += '   ' + e.pin + ' *' + endereco + '*\n'
     }
   } else {
-    msg += '   \uD83C\uDFEA Retirada na loja\n'
+    msg += '   ' + e.loja + ' Retirada na loja\n'
   }
   if (observacao) {
-    msg += '\n'
-    msg += '\uD83D\uDCDD *Observa\u00e7\u00e3o:* ' + observacao + '\n'
+    msg += '\n' + e.obs + ' *Observação:* ' + observacao + '\n'
   }
   msg += '\n'
-  msg += '_Ol\u00e1! Fiz um pedido pelo site Usina do Sol._\n'
-  msg += '_Aguardo a confirma\u00e7\u00e3o. Obrigado!_ \uD83D\uDE0A\uD83C\uDF1B'
+  msg += '_Olá! Fiz um pedido pelo site Usina do Sol._\n'
+  msg += '_Aguardo a confirmação. Obrigado!_ ' + e.smile + e.flor
 
   return encodeURIComponent(msg)
 }
