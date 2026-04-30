@@ -90,14 +90,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Dicas de acesso */}
-          <div className="mt-6 p-4 bg-sol-50 rounded-xl">
-            <p className="text-xs font-semibold text-sol-700 mb-2">Acessos de demonstração:</p>
-            <div className="space-y-1 text-xs text-gray-600">
-              <p>👑 Admin: <code>admin@usinado.sol</code> / <code>admin123</code></p>
-              <p>🌻 Mangal: <code>vendedor@mangal.com</code> / <code>vendedor123</code></p>
-            </div>
-          </div>
         </div>
 
         <p className="text-center text-sm text-gray-400 mt-4">
