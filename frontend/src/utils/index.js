@@ -142,6 +142,9 @@ export const getImagemUrl = (imagem) => {
   if (imagem.startsWith('http')) return imagem
   // logos estáticas ficam em /public/logos/
   if (imagem.startsWith('logos/')) return `/${imagem}`
-  // tudo mais fica em /uploads/
+  // já tem prefixo correto (produtos/ ou empresas/)
+  if (imagem.startsWith('produtos/') || imagem.startsWith('empresas/')) return `/uploads/${imagem}`
+  // legado: arquivo sem prefixo — tenta em uploads/produtos/
+  if (imagem.includes('.')) return `/uploads/produtos/${imagem}`
   return `/uploads/${imagem}`
 }
