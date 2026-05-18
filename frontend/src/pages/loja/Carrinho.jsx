@@ -1,12 +1,11 @@
 // src/pages/loja/Carrinho.jsx
-import { getImagemUrl } from '../../utils'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, MessageCircle, Search, MapPin, User } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../../api/axios'
 import { useCarrinho } from '../../contexts/CarrinhoContext'
-import { formatarMoeda } from '../../utils'
+import { formatarMoeda, getImagemUrl } from '../../utils'
 import HeaderPublico from '../../components/layout/HeaderPublico'
 
 const ESTADOS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
@@ -131,8 +130,7 @@ export default function Carrinho() {
               <div key={item.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex gap-4">
                 <div className="w-20 h-20 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
                   {item.imagem
-// DEPOIS
-? <img src={getImagemUrl(item.imagem)} alt={item.nome} className="w-full h-full object-cover"/>
+                    ? <img src={getImagemUrl(item.imagem)} alt={item.nome} className="w-full h-full object-cover"/>
                     : <div className="w-full h-full flex items-center justify-center text-2xl">📦</div>}
                 </div>
                 <div className="flex-1 min-w-0">

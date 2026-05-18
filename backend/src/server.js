@@ -4,6 +4,8 @@ require('express-async-errors');
 const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
+const db      = require('./db');
+const routes  = require('./routes');
 
 const app = express();
 
@@ -37,15 +39,9 @@ app.use((req, res, next) => {
 });
 
 app.get('/ping', (req, res) => res.json({ pong: true }));
-app.get('/status', (req, res) => res.json({ status: 'online' }));
 
-// Carrega rotas e banco de forma lazy (evita erro de build sem .env)
-try {
-  const routes = require('./routes');
-  app.use('/api', routes);
-} catch(e) {
-  console.error('Erro ao carregar rotas:', e.message);
-}
+app.get('/status', (req, res) => res.json({ status: 'online' }));
+app.use('/api', routes);
 
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/uploads'))
@@ -62,9 +58,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
-  // Tenta conectar ao banco após subir (não bloqueia o start)
   try {
-    const db = require('./db');
     await db.query('SELECT 1');
     console.log('✅ Banco MySQL conectado!');
   } catch(e) {
