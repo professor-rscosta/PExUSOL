@@ -6,7 +6,7 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 import api from '../../api/axios'
 import { useCarrinho } from '../../contexts/CarrinhoContext'
-import { formatarMoeda } from '../../utils'
+import { formatarMoeda, getImagemUrl } from '../../utils'
 import HeaderPublico from '../../components/layout/HeaderPublico'
 
 export default function PaginaProduto() {
