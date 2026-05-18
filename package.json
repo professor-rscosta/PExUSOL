@@ -1,8 +1,5 @@
 {
   "dependencies": {
     "mysql2": "^3.22.3"
-  },
-  "scripts": {
-    "start": "node backend/src/server.js"
   }
 }
