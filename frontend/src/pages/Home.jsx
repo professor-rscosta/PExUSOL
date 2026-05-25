@@ -107,57 +107,58 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden w-full">
 
       {/* ── NAVBAR FIXA ─────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between h-14 px-3 sm:px-6 max-w-screen-xl mx-auto">
+      <nav className="sticky top-0 z-50 w-full bg-white/95 border-b border-gray-200 shadow-sm" style={{backdropFilter:'blur(8px)'}}>
+        <div className="flex items-center justify-between h-12 sm:h-14 px-2 sm:px-5 max-w-screen-xl mx-auto">
 
-          {/* Logo */}
-          <a href="/" className="flex items-center gap-2 shrink-0">
+          {/* Logo — sempre visível, não encolhe */}
+          <a href="/" className="flex items-center gap-1.5 shrink-0 min-w-0">
             <img src="/logos/usina_sol.jpeg" alt="Usina do Sol"
-              className="w-9 h-9 rounded-full object-cover border-2 border-yellow-400 shrink-0" />
-            <div className="leading-none">
-              <p className="font-bold text-gray-800 text-sm leading-tight">Usina do Sol</p>
-              <p className="text-[10px] text-gray-400 leading-tight hidden sm:block">UNEB · Velho Chico</p>
-            </div>
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-yellow-400 shrink-0" />
+            <span className="font-bold text-gray-800 text-xs sm:text-sm leading-tight truncate max-w-[72px] sm:max-w-none">
+              Usina do Sol
+            </span>
           </a>
 
-          {/* Links centro — só desktop */}
-          <div className="hidden md:flex items-center gap-1">
-            <a href="#associacoes" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors">🏘️ Associações</a>
-            <a href="#como-comprar" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors">🛒 Como Comprar</a>
-            <a href="#sobre" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors">ℹ️ Sobre</a>
+          {/* Links centro — APENAS desktop md+ */}
+          <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
+            <a href="#associacoes" className="text-xs font-medium text-gray-600 hover:text-blue-700 px-2.5 py-2 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap">🏘️ Associações</a>
+            <a href="#como-comprar" className="text-xs font-medium text-gray-600 hover:text-blue-700 px-2.5 py-2 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap">🛒 Como Comprar</a>
+            <a href="#sobre" className="text-xs font-medium text-gray-600 hover:text-blue-700 px-2.5 py-2 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap">ℹ️ Sobre</a>
           </div>
 
-          {/* Ações direita */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Botões direita — shrink-0 garante que nunca saiam da tela */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
 
-            {/* Carrinho */}
+            {/* Carrinho — só ícone no mobile */}
             <Link to="/carrinho"
-              className="relative flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold text-xs sm:text-sm px-2.5 sm:px-3.5 py-2 rounded-xl transition-colors">
-              <ShoppingCart size={16} className="shrink-0" />
-              <span className="hidden sm:inline">Carrinho</span>
+              className="relative flex items-center justify-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-2 rounded-lg sm:rounded-xl transition-colors">
+              <ShoppingCart size={15} className="shrink-0" />
+              <span className="hidden sm:inline text-xs">Carrinho</span>
               {totalItens > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-yellow-400 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-yellow-400 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center leading-none">
                   {totalItens}
                 </span>
               )}
             </Link>
 
-            {/* Rastrear */}
+            {/* Rastrear — só ícone no mobile */}
             <Link to="/rastrear"
-              className="flex items-center gap-1 text-gray-500 hover:text-blue-700 text-xs sm:text-sm font-medium px-2 sm:px-3 py-2 rounded-xl hover:bg-blue-50 transition-colors">
-              <span className="text-sm">🔍</span>
-              <span className="hidden sm:inline">Rastrear</span>
+              className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto sm:px-2.5 sm:py-2 rounded-lg text-gray-500 hover:text-blue-700 hover:bg-blue-50 transition-colors">
+              <span className="text-sm leading-none">🔍</span>
+              <span className="hidden sm:inline text-xs ml-1">Rastrear</span>
             </Link>
 
-            {/* Área Reservada */}
+            {/* Entrar / Área Reservada */}
             <Link to="/login"
-              className="flex items-center gap-1.5 bg-[#1a2f7a] hover:bg-[#162569] text-white font-bold text-xs sm:text-[13px] px-3 sm:px-4 py-2 rounded-xl transition-colors whitespace-nowrap shadow-md">
-              <Lock size={13} className="shrink-0" />
-              <span className="hidden sm:inline">Área Reservada</span>
+              className="flex items-center gap-1 bg-[#1a2f7a] hover:bg-[#162569] text-white font-bold text-[11px] sm:text-xs px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl transition-colors shadow"
+              style={{whiteSpace:'nowrap'}}>
+              <Lock size={11} className="shrink-0 sm:hidden" />
+              <Lock size={13} className="shrink-0 hidden sm:block" />
               <span className="sm:hidden">Entrar</span>
+              <span className="hidden sm:inline">Área Reservada</span>
             </Link>
 
           </div>
@@ -165,27 +166,27 @@ export default function Home() {
       </nav>
 
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-br from-[#0f1f5c] via-[#1a2f7a] to-[#1e40af] text-white overflow-hidden">
-        <div className="max-w-5xl mx-auto px-4 py-16 text-center">
+      <section className="bg-gradient-to-br from-[#0f1f5c] via-[#1a2f7a] to-[#1e40af] text-white overflow-hidden w-full">
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 py-8 sm:py-16 text-center">
           <div className="flex justify-center mb-5">
             <img src="/logos/usina_sol.jpeg" alt="Logo Usina do Sol"
-              className="w-28 h-28 rounded-full object-cover ring-4 ring-yellow-400 shadow-2xl" />
+              className="w-20 h-20 sm:w-28 sm:h-28 rounded-full object-cover ring-4 ring-yellow-400 shadow-2xl" />
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-2 tracking-tight">☀️ Usina do Sol</h1>
-          <p className="text-yellow-300 font-bold text-base sm:text-lg mb-1 tracking-wide uppercase px-2">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-2 tracking-tight">☀️ Usina do Sol</h1>
+          <p className="text-yellow-300 font-bold text-[10px] sm:text-sm mb-1 tracking-wide uppercase leading-snug px-2">
             Projeto de Extensão · UNEB · Território Velho Chico
           </p>
-          <p className="text-blue-100 text-sm font-medium mb-3 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-blue-100 text-xs sm:text-sm font-medium mb-2 max-w-3xl mx-auto leading-relaxed px-2">
             Assistência Técnica Sócio-Produtiva para Institucionalização de Associações da Sociedade Civil
           </p>
-          <div className="flex items-center justify-center gap-1.5 mt-2 text-blue-300 text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-1 mt-2 text-blue-300 text-[10px] sm:text-sm px-2">
             <MapPin className="w-4 h-4" />
-            <span className="text-center">Bom Jesus da Lapa · Sítio do Mato ·{" "}<br className="sm:hidden" />Serra do Ramalho · Paratinga · Riacho de Santana — BA</span>
+            <span className="text-center leading-relaxed">Bom Jesus da Lapa · Sítio do Mato ·<br className="sm:hidden" /> Serra do Ramalho · Paratinga · Riacho de Santana — BA</span>
           </div>
           <div className="flex items-center justify-center gap-3 mt-3 flex-wrap">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5">
-              <span className="text-xs text-blue-200">Coordenação</span>
-              <span className="text-xs font-semibold text-white">Profa. Dra. Deyse Queirós Santos</span>
+            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-2.5 sm:px-4 py-1.5 max-w-full">
+              <span className="hidden sm:inline text-xs text-blue-200">Coordenação</span>
+              <span className="text-[10px] sm:text-xs font-semibold text-white">Profa. Dra. Deyse Queirós Santos</span>
             </div>
             <a
               href="https://www.instagram.com/deyse42/"
@@ -199,17 +200,17 @@ export default function Home() {
               @deyse42
             </a>
           </div>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="mt-5 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3">
             <a href="#associacoes"
-              className="bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-4 sm:px-7 py-3 rounded-full transition-all shadow-lg flex items-center gap-2 text-sm sm:text-base">
+              className="bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-4 sm:px-7 py-2.5 sm:py-3 rounded-full transition-all shadow-lg flex items-center gap-2 text-xs sm:text-base">
               <ShoppingBag className="w-5 h-5" /> Ver Associações
             </a>
             <a href="#como-comprar"
-              className="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold px-4 sm:px-7 py-3 rounded-full transition-all flex items-center gap-2 text-sm sm:text-base">
+              className="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold px-4 sm:px-7 py-2.5 sm:py-3 rounded-full transition-all flex items-center gap-2 text-xs sm:text-base">
               🛒 Como Comprar
             </a>
             <a href="#sobre"
-              className="border-2 border-blue-300 hover:bg-blue-800 text-white px-4 sm:px-7 py-3 rounded-full transition-all flex items-center gap-2 text-sm sm:text-base">
+              className="border-2 border-blue-300 hover:bg-blue-800 text-white px-4 sm:px-7 py-2.5 sm:py-3 rounded-full transition-all flex items-center gap-2 text-xs sm:text-base">
               Sobre o Projeto <ArrowRight className="w-4 h-4" />
             </a>
           </div>
