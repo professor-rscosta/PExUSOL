@@ -110,42 +110,58 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
 
       {/* ── NAVBAR FIXA ───────────────────────────────────────── */}
-      <nav style={{position:'sticky',top:0,zIndex:50,background:'rgba(255,255,255,0.97)',borderBottom:'1px solid #e5e7eb',boxShadow:'0 1px 6px rgba(0,0,0,.07)'}}>
-        <div style={{maxWidth:1280,margin:'0 auto',padding:'0 12px',height:60,display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
-          {/* Logo */}
-          <a href="/" style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none'}}>
-            <img src="/logos/usina_sol.jpeg" alt="Usina do Sol" style={{width:38,height:38,borderRadius:'50%',objectFit:'cover',border:'2px solid #facc15'}}/>
-            <div>
-              <div style={{fontWeight:700,color:'#1f2937',fontSize:14,lineHeight:1}}>Usina do Sol</div>
-              <div style={{fontSize:11,color:'#9ca3af',lineHeight:1.4}}>UNEB · Velho Chico</div>
+      <nav className="sticky top-0 z-50 bg-white/97 border-b border-gray-200"
+           style={{backdropFilter:'blur(8px)',boxShadow:'0 1px 6px rgba(0,0,0,.07)'}}>
+        <div className="w-full max-w-screen-xl mx-auto px-3 sm:px-5 h-14 sm:h-[60px] flex items-center justify-between gap-2">
+
+          {/* Logo — sempre visível */}
+          <a href="/" className="flex items-center gap-2 shrink-0 no-underline">
+            <img src="/logos/usina_sol.jpeg" alt="Usina do Sol"
+              className="w-9 h-9 rounded-full object-cover border-2 border-yellow-400"/>
+            <div className="leading-none">
+              <div className="font-bold text-gray-800 text-sm leading-tight">Usina do Sol</div>
+              <div className="text-[10px] text-gray-400 leading-tight hidden xs:block">UNEB · Velho Chico</div>
             </div>
           </a>
 
-          {/* Links centro - desktop */}
-          <div style={{display:'flex',alignItems:'center',gap:4}} className="hidden md:flex">
-            <a href="#associacoes" style={{fontSize:13,fontWeight:500,color:'#374151',padding:'6px 12px',borderRadius:8,textDecoration:'none'}}>🏘️ Associações</a>
-            <a href="#como-comprar" style={{fontSize:13,fontWeight:500,color:'#374151',padding:'6px 12px',borderRadius:8,textDecoration:'none'}}>🛒 Como Comprar</a>
-            <a href="#sobre" style={{fontSize:13,fontWeight:500,color:'#374151',padding:'6px 12px',borderRadius:8,textDecoration:'none'}}>ℹ️ Sobre</a>
+          {/* Links centro — apenas desktop */}
+          <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
+            <a href="#associacoes" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors no-underline">🏘️ Associações</a>
+            <a href="#como-comprar" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors no-underline">🛒 Como Comprar</a>
+            <a href="#sobre" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors no-underline">ℹ️ Sobre</a>
           </div>
 
-          {/* Botões direita */}
-          <div style={{display:'flex',alignItems:'center',gap:8}}>
-            <Link to="/carrinho" style={{position:'relative',display:'flex',alignItems:'center',gap:6,background:'#fffbeb',color:'#92400e',fontWeight:600,fontSize:13,padding:'7px 14px',borderRadius:10,textDecoration:'none'}}>
-              <ShoppingCart size={18}/>
-              <span className="hidden sm:inline">Carrinho</span>
+          {/* Botões direita — unificados e responsivos */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+
+            {/* Carrinho — ícone + badge */}
+            <Link to="/carrinho"
+              className="relative flex items-center gap-1.5 bg-amber-50 text-amber-800 font-semibold text-[13px] px-2.5 sm:px-3.5 py-2 rounded-xl no-underline hover:bg-amber-100 transition-colors">
+              <ShoppingCart size={17}/>
+              <span className="hidden sm:inline text-sm">Carrinho</span>
               {totalItens > 0 && (
-                <span style={{position:'absolute',top:-6,right:-6,background:'#f59e0b',color:'#fff',fontSize:10,fontWeight:700,width:18,height:18,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center'}}>{totalItens}</span>
+                <span className="absolute -top-1.5 -right-1.5 bg-yellow-400 text-white text-[10px] font-black w-[18px] h-[18px] rounded-full flex items-center justify-center leading-none">
+                  {totalItens}
+                </span>
               )}
             </Link>
 
-            <Link to="/rastrear" className="text-sm text-blue-200 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/10 flex items-center gap-1.5">
-              <span>🔍</span>
-              <span className="hidden sm:inline">Rastrear Pedido</span>
+            {/* Rastrear — só ícone no mobile */}
+            <Link to="/rastrear"
+              className="flex items-center gap-1.5 text-gray-500 hover:text-blue-700 text-[13px] font-medium px-2.5 sm:px-3 py-2 rounded-xl hover:bg-blue-50 transition-colors no-underline">
+              <span className="text-base leading-none">🔍</span>
+              <span className="hidden sm:inline">Rastrear</span>
             </Link>
-            <Link to="/login" style={{display:'flex',alignItems:'center',gap:8,background:'#1a2f7a',color:'#ffffff',fontWeight:700,fontSize:13,padding:'8px 16px',borderRadius:10,textDecoration:'none',boxShadow:'0 2px 8px rgba(26,47,122,.25)'}}>
-              <Lock size={15}/>
-              <span className="inline">Entrar</span>
+
+            {/* Área Reservada — unificado, nunca ultrapassa */}
+            <Link to="/login"
+              className="flex items-center gap-1.5 sm:gap-2 bg-[#1a2f7a] hover:bg-[#162569] text-white font-bold text-[13px] px-3 sm:px-4 py-2 rounded-xl no-underline transition-colors"
+              style={{boxShadow:'0 2px 8px rgba(26,47,122,.25)',whiteSpace:'nowrap'}}>
+              <Lock size={14}/>
+              <span className="hidden sm:inline">Área Reservada</span>
+              <span className="inline sm:hidden">Entrar</span>
             </Link>
+
           </div>
         </div>
       </nav>
