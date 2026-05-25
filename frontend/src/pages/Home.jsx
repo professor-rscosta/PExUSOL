@@ -109,57 +109,55 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
 
-      {/* ── NAVBAR FIXA ───────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-white/97 border-b border-gray-200"
-           style={{backdropFilter:'blur(8px)',boxShadow:'0 1px 6px rgba(0,0,0,.07)'}}>
-        <div className="w-full max-w-screen-xl mx-auto px-3 sm:px-5 h-14 sm:h-[60px] flex items-center justify-between gap-2">
+      {/* ── NAVBAR FIXA ─────────────────────────────────────── */}
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between h-14 px-3 sm:px-6 max-w-screen-xl mx-auto">
 
-          {/* Logo — sempre visível */}
-          <a href="/" className="flex items-center gap-2 shrink-0 no-underline">
+          {/* Logo */}
+          <a href="/" className="flex items-center gap-2 shrink-0">
             <img src="/logos/usina_sol.jpeg" alt="Usina do Sol"
-              className="w-9 h-9 rounded-full object-cover border-2 border-yellow-400"/>
+              className="w-9 h-9 rounded-full object-cover border-2 border-yellow-400 shrink-0" />
             <div className="leading-none">
-              <div className="font-bold text-gray-800 text-sm leading-tight">Usina do Sol</div>
-              <div className="text-[10px] text-gray-400 leading-tight hidden xs:block">UNEB · Velho Chico</div>
+              <p className="font-bold text-gray-800 text-sm leading-tight">Usina do Sol</p>
+              <p className="text-[10px] text-gray-400 leading-tight hidden sm:block">UNEB · Velho Chico</p>
             </div>
           </a>
 
-          {/* Links centro — apenas desktop */}
-          <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
-            <a href="#associacoes" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors no-underline">🏘️ Associações</a>
-            <a href="#como-comprar" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors no-underline">🛒 Como Comprar</a>
-            <a href="#sobre" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors no-underline">ℹ️ Sobre</a>
+          {/* Links centro — só desktop */}
+          <div className="hidden md:flex items-center gap-1">
+            <a href="#associacoes" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors">🏘️ Associações</a>
+            <a href="#como-comprar" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors">🛒 Como Comprar</a>
+            <a href="#sobre" className="text-[13px] font-medium text-gray-600 hover:text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors">ℹ️ Sobre</a>
           </div>
 
-          {/* Botões direita — unificados e responsivos */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Ações direita */}
+          <div className="flex items-center gap-2 shrink-0">
 
-            {/* Carrinho — ícone + badge */}
+            {/* Carrinho */}
             <Link to="/carrinho"
-              className="relative flex items-center gap-1.5 bg-amber-50 text-amber-800 font-semibold text-[13px] px-2.5 sm:px-3.5 py-2 rounded-xl no-underline hover:bg-amber-100 transition-colors">
-              <ShoppingCart size={17}/>
-              <span className="hidden sm:inline text-sm">Carrinho</span>
+              className="relative flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold text-xs sm:text-sm px-2.5 sm:px-3.5 py-2 rounded-xl transition-colors">
+              <ShoppingCart size={16} className="shrink-0" />
+              <span className="hidden sm:inline">Carrinho</span>
               {totalItens > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-yellow-400 text-white text-[10px] font-black w-[18px] h-[18px] rounded-full flex items-center justify-center leading-none">
+                <span className="absolute -top-1.5 -right-1.5 bg-yellow-400 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center">
                   {totalItens}
                 </span>
               )}
             </Link>
 
-            {/* Rastrear — só ícone no mobile */}
+            {/* Rastrear */}
             <Link to="/rastrear"
-              className="flex items-center gap-1.5 text-gray-500 hover:text-blue-700 text-[13px] font-medium px-2.5 sm:px-3 py-2 rounded-xl hover:bg-blue-50 transition-colors no-underline">
-              <span className="text-base leading-none">🔍</span>
+              className="flex items-center gap-1 text-gray-500 hover:text-blue-700 text-xs sm:text-sm font-medium px-2 sm:px-3 py-2 rounded-xl hover:bg-blue-50 transition-colors">
+              <span className="text-sm">🔍</span>
               <span className="hidden sm:inline">Rastrear</span>
             </Link>
 
-            {/* Área Reservada — unificado, nunca ultrapassa */}
+            {/* Área Reservada */}
             <Link to="/login"
-              className="flex items-center gap-1.5 sm:gap-2 bg-[#1a2f7a] hover:bg-[#162569] text-white font-bold text-[13px] px-3 sm:px-4 py-2 rounded-xl no-underline transition-colors"
-              style={{boxShadow:'0 2px 8px rgba(26,47,122,.25)',whiteSpace:'nowrap'}}>
-              <Lock size={14}/>
+              className="flex items-center gap-1.5 bg-[#1a2f7a] hover:bg-[#162569] text-white font-bold text-xs sm:text-[13px] px-3 sm:px-4 py-2 rounded-xl transition-colors whitespace-nowrap shadow-md">
+              <Lock size={13} className="shrink-0" />
               <span className="hidden sm:inline">Área Reservada</span>
-              <span className="inline sm:hidden">Entrar</span>
+              <span className="sm:hidden">Entrar</span>
             </Link>
 
           </div>
@@ -173,20 +171,20 @@ export default function Home() {
             <img src="/logos/usina_sol.jpeg" alt="Logo Usina do Sol"
               className="w-28 h-28 rounded-full object-cover ring-4 ring-yellow-400 shadow-2xl" />
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold mb-2 tracking-tight">☀️ Usina do Sol</h1>
-          <p className="text-yellow-300 font-bold text-sm sm:text-base mb-1 tracking-wide uppercase px-2">
+          <h1 className="text-4xl sm:text-5xl font-extrabold mb-2 tracking-tight">☀️ Usina do Sol</h1>
+          <p className="text-yellow-300 font-bold text-base sm:text-lg mb-1 tracking-wide uppercase px-2">
             Projeto de Extensão · UNEB · Território Velho Chico
           </p>
-          <p className="text-blue-100 text-sm font-medium mb-3 max-w-3xl mx-auto leading-relaxed px-2">
+          <p className="text-blue-100 text-sm font-medium mb-3 max-w-3xl mx-auto leading-relaxed">
             Assistência Técnica Sócio-Produtiva para Institucionalização de Associações da Sociedade Civil
           </p>
-          <div className="flex items-center justify-center gap-1.5 mt-2 text-blue-300 text-sm px-2">
+          <div className="flex items-center justify-center gap-1.5 mt-2 text-blue-300 text-sm">
             <MapPin className="w-4 h-4" />
-            <span className="text-center leading-relaxed">Bom Jesus da Lapa · Sítio do Mato ·{" "}<br className="sm:hidden" />Serra do Ramalho · Paratinga · Riacho de Santana — BA</span>
+            <span className="text-center">Bom Jesus da Lapa · Sítio do Mato ·{" "}<br className="sm:hidden" />Serra do Ramalho · Paratinga · Riacho de Santana — BA</span>
           </div>
           <div className="flex items-center justify-center gap-3 mt-3 flex-wrap">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1.5 max-w-full">
-              <span className="text-xs text-blue-200 hidden sm:inline">Coordenação</span>
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5">
+              <span className="text-xs text-blue-200">Coordenação</span>
               <span className="text-xs font-semibold text-white">Profa. Dra. Deyse Queirós Santos</span>
             </div>
             <a
@@ -364,7 +362,7 @@ export default function Home() {
           </div>
 
           {/* Texto principal */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-8 mb-10">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-10">
             <div className="flex items-start gap-4 mb-6">
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                 <BookOpen className="w-5 h-5 text-white" />
@@ -445,7 +443,7 @@ export default function Home() {
           {/* Parceiros */}
           <div className="bg-gray-800 rounded-2xl p-8 text-white">
             <h3 className="text-xl font-bold text-center mb-6 text-yellow-400">🤝 Parceiros Institucionais</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               {PARCEIROS.map((p) => (
                 <div key={p.nome} className="text-center">
                   <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-2xl mx-auto mb-2">
