@@ -1,7 +1,7 @@
 // src/components/layout/AdminLayout.jsx
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
-  Sun, LayoutDashboard, Building2, Users, Package,
+  LayoutDashboard, Building2, Users, Package,
   ShoppingBag, Tag, LogOut, Menu, X, User
 } from 'lucide-react'
 import { useState } from 'react'
@@ -32,9 +32,11 @@ export default function AdminLayout() {
       <aside className="hidden md:flex w-64 bg-gray-900 flex-col">
         <div className="p-5 border-b border-gray-700">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-sol-400 to-terra-500 rounded-xl flex items-center justify-center">
-              <Sun className="w-5 h-5 text-white" />
-            </div>
+            <img
+              src="/logos/usina_sol.jpeg"
+              alt="Usina do Sol"
+              className="w-10 h-10 rounded-xl object-cover ring-2 ring-yellow-400/60"
+            />
             <div>
               <div className="text-white font-bold text-sm">Usina do Sol</div>
               <div className="text-gray-400 text-xs">Painel Admin</div>

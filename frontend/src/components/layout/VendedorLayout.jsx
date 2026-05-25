@@ -37,9 +37,8 @@ export default function VendedorLayout() {
                 alt={usuario?.empresa?.nome}
                 className="w-11 h-11 rounded-xl object-cover ring-2 ring-yellow-400/60 bg-white p-0.5"/>
             ) : (
-              <div className="w-11 h-11 rounded-xl bg-yellow-400 flex items-center justify-center text-[#0f1f5c] font-black text-lg">
-                {usuario?.empresa?.nome?.[0] || 'U'}
-              </div>
+              <img src="/logos/usina_sol.jpeg" alt="Usina do Sol"
+                className="w-11 h-11 rounded-xl object-cover ring-2 ring-yellow-400/60"/>
             )}
             <div className="min-w-0">
               <div className="text-white font-bold text-sm truncate">

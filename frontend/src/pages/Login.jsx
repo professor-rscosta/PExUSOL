@@ -1,7 +1,7 @@
 // src/pages/Login.jsx
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Sun, Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -27,11 +27,15 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-sol-400 to-terra-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-float">
-            <Sun className="w-9 h-9 text-white" />
+          <div className="flex justify-center mb-4">
+            <img
+              src="/logos/usina_sol.jpeg"
+              alt="Usina do Sol"
+              className="w-24 h-24 rounded-2xl object-cover ring-4 ring-yellow-400 shadow-lg"
+            />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Usina do Sol</h1>
-          <p className="text-gray-500 text-sm mt-1">Painel de Gestão</p>
+          <p className="text-gray-500 text-sm mt-1">Plataforma de Associações · UNEB</p>
         </div>
 
         {/* Card */}
