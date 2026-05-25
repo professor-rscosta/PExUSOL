@@ -107,11 +107,11 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
 
       {/* ── NAVBAR FIXA ───────────────────────────────────────── */}
       <nav style={{position:'sticky',top:0,zIndex:50,background:'rgba(255,255,255,0.97)',borderBottom:'1px solid #e5e7eb',boxShadow:'0 1px 6px rgba(0,0,0,.07)'}}>
-        <div style={{maxWidth:1280,margin:'0 auto',padding:'0 20px',height:60,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <div style={{maxWidth:1280,margin:'0 auto',padding:'0 12px',height:60,display:'flex',alignItems:'center',justifyContent:'space-between',gap:8}}>
           {/* Logo */}
           <a href="/" style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none'}}>
             <img src="/logos/usina_sol.jpeg" alt="Usina do Sol" style={{width:38,height:38,borderRadius:'50%',objectFit:'cover',border:'2px solid #facc15'}}/>
@@ -144,33 +144,33 @@ export default function Home() {
             </Link>
             <Link to="/login" style={{display:'flex',alignItems:'center',gap:8,background:'#1a2f7a',color:'#ffffff',fontWeight:700,fontSize:13,padding:'8px 16px',borderRadius:10,textDecoration:'none',boxShadow:'0 2px 8px rgba(26,47,122,.25)'}}>
               <Lock size={15}/>
-              <span>Área Reservada</span>
+              <span className="inline">Entrar</span>
             </Link>
           </div>
         </div>
       </nav>
 
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-br from-[#0f1f5c] via-[#1a2f7a] to-[#1e40af] text-white">
+      <section className="bg-gradient-to-br from-[#0f1f5c] via-[#1a2f7a] to-[#1e40af] text-white overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 py-16 text-center">
           <div className="flex justify-center mb-5">
             <img src="/logos/usina_sol.jpeg" alt="Logo Usina do Sol"
               className="w-28 h-28 rounded-full object-cover ring-4 ring-yellow-400 shadow-2xl" />
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-2 tracking-tight">☀️ Usina do Sol</h1>
-          <p className="text-yellow-300 font-bold text-base sm:text-lg mb-1 tracking-widest uppercase">
+          <h1 className="text-3xl sm:text-5xl font-extrabold mb-2 tracking-tight">☀️ Usina do Sol</h1>
+          <p className="text-yellow-300 font-bold text-sm sm:text-base mb-1 tracking-wide uppercase px-2">
             Projeto de Extensão · UNEB · Território Velho Chico
           </p>
-          <p className="text-blue-100 text-sm font-medium mb-3 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-blue-100 text-sm font-medium mb-3 max-w-3xl mx-auto leading-relaxed px-2">
             Assistência Técnica Sócio-Produtiva para Institucionalização de Associações da Sociedade Civil
           </p>
-          <div className="flex items-center justify-center gap-1.5 mt-2 text-blue-300 text-sm">
+          <div className="flex items-center justify-center gap-1.5 mt-2 text-blue-300 text-sm px-2">
             <MapPin className="w-4 h-4" />
-            <span>Bom Jesus da Lapa · Sítio do Mato · Serra do Ramalho · Paratinga · Riacho de Santana — BA</span>
+            <span className="text-center leading-relaxed">Bom Jesus da Lapa · Sítio do Mato ·{" "}<br className="sm:hidden" />Serra do Ramalho · Paratinga · Riacho de Santana — BA</span>
           </div>
           <div className="flex items-center justify-center gap-3 mt-3 flex-wrap">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5">
-              <span className="text-xs text-blue-200">Coordenação</span>
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1.5 max-w-full">
+              <span className="text-xs text-blue-200 hidden sm:inline">Coordenação</span>
               <span className="text-xs font-semibold text-white">Profa. Dra. Deyse Queirós Santos</span>
             </div>
             <a
@@ -187,15 +187,15 @@ export default function Home() {
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <a href="#associacoes"
-              className="bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-7 py-3 rounded-full transition-all shadow-lg flex items-center gap-2 text-base">
+              className="bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-4 sm:px-7 py-3 rounded-full transition-all shadow-lg flex items-center gap-2 text-sm sm:text-base">
               <ShoppingBag className="w-5 h-5" /> Ver Associações
             </a>
             <a href="#como-comprar"
-              className="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold px-7 py-3 rounded-full transition-all flex items-center gap-2 text-base">
+              className="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold px-4 sm:px-7 py-3 rounded-full transition-all flex items-center gap-2 text-sm sm:text-base">
               🛒 Como Comprar
             </a>
             <a href="#sobre"
-              className="border-2 border-blue-300 hover:bg-blue-800 text-white px-7 py-3 rounded-full transition-all flex items-center gap-2 text-base">
+              className="border-2 border-blue-300 hover:bg-blue-800 text-white px-4 sm:px-7 py-3 rounded-full transition-all flex items-center gap-2 text-sm sm:text-base">
               Sobre o Projeto <ArrowRight className="w-4 h-4" />
             </a>
           </div>
@@ -348,7 +348,7 @@ export default function Home() {
           </div>
 
           {/* Texto principal */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-10">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-8 mb-10">
             <div className="flex items-start gap-4 mb-6">
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                 <BookOpen className="w-5 h-5 text-white" />
@@ -429,7 +429,7 @@ export default function Home() {
           {/* Parceiros */}
           <div className="bg-gray-800 rounded-2xl p-8 text-white">
             <h3 className="text-xl font-bold text-center mb-6 text-yellow-400">🤝 Parceiros Institucionais</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {PARCEIROS.map((p) => (
                 <div key={p.nome} className="text-center">
                   <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-2xl mx-auto mb-2">
