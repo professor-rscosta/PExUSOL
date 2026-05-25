@@ -99,9 +99,7 @@ export default function VendedorLayout() {
             <img src={getImagemUrl(logoEmpresa)}
               alt="" className="w-8 h-8 rounded-lg object-cover bg-white p-0.5"/>
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-yellow-400 flex items-center justify-center text-[#0f1f5c] font-black text-sm">
-              {usuario?.empresa?.nome?.[0] || 'U'}
-            </div>
+            <img src="/logos/usina_sol.jpeg" alt="Usina do Sol" className="w-8 h-8 rounded-lg object-cover ring-1 ring-yellow-400" />
           )}
           <span className="text-white font-bold text-sm">
             {usuario?.empresa?.nome?.split(' ').slice(0,2).join(' ') || 'Vendedor'}

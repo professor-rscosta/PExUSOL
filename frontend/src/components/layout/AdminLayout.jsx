@@ -84,7 +84,7 @@ export default function AdminLayout() {
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-gray-900 px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sun className="w-5 h-5 text-sol-400" />
+          <img src="/logos/usina_sol.jpeg" alt="Usina do Sol" className="w-7 h-7 rounded-lg object-cover ring-1 ring-yellow-400/60" />
           <span className="text-white font-bold text-sm">Usina do Sol</span>
         </div>
         <button onClick={() => setMenuAberto(!menuAberto)} className="text-gray-300">
