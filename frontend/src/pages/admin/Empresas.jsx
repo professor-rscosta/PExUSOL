@@ -1,9 +1,36 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Edit, Trash2, Globe, Phone, Upload, Power, PowerOff } from 'lucide-react'
-import toast from 'react-hot-toast'
+import Swal from 'sweetalert2'
 import api from '../../api/axios'
 import { getImagemUrl } from '../../utils'
+
+// ── SweetAlert2 tema personalizado ──────────────────────────
+const swalTheme = Swal.mixin({
+  customClass: {
+    popup:         'rounded-2xl shadow-2xl font-sans',
+    title:         'text-lg font-bold text-gray-800',
+    htmlContainer: 'text-sm text-gray-500',
+    confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors',
+    cancelButton:  'bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-5 py-2.5 rounded-xl transition-colors mr-2',
+    icon:          'border-none',
+  },
+  buttonsStyling: false,
+  reverseButtons: true,
+})
+
+const swalDanger = Swal.mixin({
+  customClass: {
+    popup:         'rounded-2xl shadow-2xl font-sans',
+    title:         'text-lg font-bold text-gray-800',
+    htmlContainer: 'text-sm text-gray-500',
+    confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors',
+    cancelButton:  'bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-5 py-2.5 rounded-xl transition-colors mr-2',
+    icon:          'border-none',
+  },
+  buttonsStyling: false,
+  reverseButtons: true,
+})
 
 export default function AdminEmpresas() {
   const qc = useQueryClient()
@@ -13,13 +40,12 @@ export default function AdminEmpresas() {
   const [logo, setLogo]           = useState(null)
   const [previewLogo, setPreviewLogo] = useState(null)
 
-  // ── Busca empresas ─────────────────────────────────────────
   const { data: empresas = [], isLoading } = useQuery({
     queryKey: ['admin-empresas'],
     queryFn: async () => (await api.get('/admin/empresas')).data,
   })
 
-  // ── Salvar (criar/editar) ───────────────────────────────────
+  // ── Salvar ─────────────────────────────────────────────────
   const salvar = useMutation({
     mutationFn: async (dados) => {
       const fd = new FormData()
@@ -34,30 +60,99 @@ export default function AdminEmpresas() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-empresas'] })
-      toast.success(editando ? 'Associação atualizada!' : 'Associação criada!')
       fecharModal()
+      swalTheme.fire({
+        icon: 'success',
+        title: editando ? '✅ Associação atualizada!' : '✅ Associação criada!',
+        html: editando
+          ? 'As informações foram salvas com sucesso.'
+          : 'A nova associação está ativa e visível no site.',
+        timer: 2500,
+        showConfirmButton: false,
+      })
     },
-    onError: (err) => toast.error(err.response?.data?.erro || 'Erro ao salvar'),
+    onError: (err) => swalTheme.fire({
+      icon: 'error',
+      title: '❌ Erro ao salvar',
+      html: err.response?.data?.erro || 'Tente novamente.',
+    }),
   })
 
-  // ── Toggle ativo/inativo ────────────────────────────────────
+  // ── Toggle ativo ───────────────────────────────────────────
   const toggleAtivo = useMutation({
     mutationFn: (id) => api.patch(`/admin/empresas/${id}/toggle`),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['admin-empresas'] })
-      toast.success(res.data?.ativo ? '✅ Associação ativada!' : '⛔ Associação desativada!')
+      swalTheme.fire({
+        icon: res.data?.ativo ? 'success' : 'warning',
+        title: res.data?.ativo ? '✅ Associação ativada!' : '⛔ Associação desativada!',
+        html: res.data?.ativo
+          ? 'Agora está visível na página inicial.'
+          : 'Agora está oculta na página inicial.',
+        timer: 2000,
+        showConfirmButton: false,
+      })
     },
-    onError: () => toast.error('Erro ao alterar status'),
+    onError: () => swalDanger.fire({ icon: 'error', title: 'Erro', html: 'Não foi possível alterar o status.' }),
   })
 
-  // ── Excluir ─────────────────────────────────────────────────
+  // ── Excluir ────────────────────────────────────────────────
   const excluir = useMutation({
     mutationFn: (id) => api.delete(`/admin/empresas/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-empresas'] })
-      toast.success('Associação removida!')
+      swalDanger.fire({
+        icon: 'success',
+        title: '🗑️ Excluída permanentemente!',
+        html: 'A associação e todos os seus dados foram removidos.',
+        timer: 2500,
+        showConfirmButton: false,
+      })
     },
+    onError: (err) => swalDanger.fire({
+      icon: 'error',
+      title: 'Erro ao excluir',
+      html: err.response?.data?.erro || 'Tente novamente.',
+    }),
   })
+
+  // ── Confirmação de exclusão ────────────────────────────────
+  const confirmarExclusao = async (emp) => {
+    const result = await swalDanger.fire({
+      icon: 'warning',
+      title: '⚠️ Excluir definitivamente?',
+      html: `
+        <p>Você está prestes a excluir:</p>
+        <p class="font-bold text-gray-800 mt-1 mb-3">${emp.nome}</p>
+        <div class="bg-red-50 border border-red-100 rounded-xl p-3 text-left text-xs text-red-600 space-y-1">
+          <p>🗑️ Todos os produtos serão removidos</p>
+          <p>🗑️ Todos os pedidos serão removidos</p>
+          <p>🗑️ Todos os usuários vinculados serão removidos</p>
+          <p class="font-bold mt-1">Esta ação não pode ser desfeita!</p>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Sim, excluir',
+      cancelButtonText: 'Cancelar',
+    })
+    if (result.isConfirmed) excluir.mutate(emp.id)
+  }
+
+  // ── Confirmação de toggle ──────────────────────────────────
+  const confirmarToggle = async (emp) => {
+    const ativa = Boolean(emp.ativo)
+    const result = await swalTheme.fire({
+      icon: ativa ? 'warning' : 'question',
+      title: ativa ? '⛔ Desativar associação?' : '✅ Ativar associação?',
+      html: ativa
+        ? `<b>${emp.nome}</b> ficará oculta na página inicial e clientes não poderão acessar a loja.`
+        : `<b>${emp.nome}</b> voltará a aparecer na página inicial e a loja ficará acessível.`,
+      showCancelButton: true,
+      confirmButtonText: ativa ? 'Desativar' : 'Ativar',
+      cancelButtonText: 'Cancelar',
+    })
+    if (result.isConfirmed) toggleAtivo.mutate(emp.id)
+  }
 
   const abrirEditar = (emp) => {
     setEditando(emp.id)
@@ -77,7 +172,6 @@ export default function AdminEmpresas() {
 
   return (
     <div>
-      {/* Cabeçalho */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Associações</h1>
@@ -90,7 +184,6 @@ export default function AdminEmpresas() {
         </button>
       </div>
 
-      {/* Grid de empresas */}
       {isLoading ? (
         <div className="grid sm:grid-cols-2 gap-4">
           {[1,2,3,4].map(i=><div key={i} className="bg-white rounded-2xl h-48 animate-pulse"/>)}
@@ -103,18 +196,14 @@ export default function AdminEmpresas() {
             return (
               <div key={emp.id}
                 className={`bg-white rounded-2xl border shadow-sm hover:shadow-md transition-all overflow-hidden ${
-                  ativa ? 'border-gray-100' : 'border-red-100 opacity-75'
+                  ativa ? 'border-gray-100' : 'border-red-100 opacity-70'
                 }`}>
 
-                {/* Cabeçalho do card */}
                 <div className={`p-4 flex items-center gap-4 ${
-                  ativa
-                    ? 'bg-gradient-to-r from-[#0f1f5c] to-[#1e40af]'
-                    : 'bg-gradient-to-r from-gray-600 to-gray-700'
+                  ativa ? 'bg-gradient-to-r from-[#0f1f5c] to-[#1e40af]' : 'bg-gradient-to-r from-gray-500 to-gray-600'
                 }`}>
                   {logoSrc ? (
-                    <img src={logoSrc} alt={emp.nome}
-                      className="w-14 h-14 rounded-xl object-contain bg-white p-1 shrink-0"/>
+                    <img src={logoSrc} alt={emp.nome} className="w-14 h-14 rounded-xl object-contain bg-white p-1 shrink-0"/>
                   ) : (
                     <div className="w-14 h-14 rounded-xl bg-yellow-400 flex items-center justify-center text-[#0f1f5c] font-black text-2xl shrink-0">
                       {emp.nome[0]}
@@ -133,54 +222,41 @@ export default function AdminEmpresas() {
                 </div>
 
                 <div className="p-4 space-y-3">
-                  {emp.descricao && (
-                    <p className="text-gray-500 text-sm line-clamp-2">{emp.descricao}</p>
-                  )}
+                  {emp.descricao && <p className="text-gray-500 text-sm line-clamp-2">{emp.descricao}</p>}
                   <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-                    {emp.whatsapp && (
-                      <span className="flex items-center gap-1">
-                        <Phone className="w-3.5 h-3.5 text-green-500"/>{emp.whatsapp}
-                      </span>
-                    )}
+                    {emp.whatsapp && <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-green-500"/>{emp.whatsapp}</span>}
                     {emp.site && (
-                      <a href={emp.site} target="_blank" rel="noreferrer"
-                        className="flex items-center gap-1 text-blue-500 hover:underline">
+                      <a href={emp.site} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-blue-500 hover:underline">
                         <Globe className="w-3.5 h-3.5"/> Site oficial
                       </a>
                     )}
                   </div>
 
-                  {/* Botões de ação */}
                   <div className="flex gap-2 pt-1">
-
-                    {/* Toggle ativo/inativo — botão principal */}
+                    {/* Toggle */}
                     <button
-                      onClick={() => toggleAtivo.mutate(emp.id)}
+                      onClick={() => confirmarToggle(emp)}
                       disabled={toggleAtivo.isPending}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
+                      title={ativa ? 'Clique para desativar' : 'Clique para ativar'}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all disabled:opacity-50 ${
                         ativa
                           ? 'bg-green-50 text-green-700 border-green-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
                           : 'bg-red-50 text-red-600 border-red-200 hover:bg-green-50 hover:text-green-700 hover:border-green-200'
-                      } disabled:opacity-50`}
-                      title={ativa ? 'Clique para desativar e ocultar do site' : 'Clique para ativar e exibir no site'}
-                    >
-                      {ativa
-                        ? <><PowerOff className="w-3.5 h-3.5"/> Desativar</>
-                        : <><Power className="w-3.5 h-3.5"/> Ativar</>
-                      }
+                      }`}>
+                      {ativa ? <><PowerOff className="w-3.5 h-3.5"/> Desativar</> : <><Power className="w-3.5 h-3.5"/> Ativar</>}
                     </button>
 
                     {/* Editar */}
-                    <button
-                      onClick={() => abrirEditar(emp)}
+                    <button onClick={() => abrirEditar(emp)}
                       className="flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1.5">
                       <Edit className="w-3.5 h-3.5"/> Editar
                     </button>
 
                     {/* Excluir */}
                     <button
-                      onClick={() => confirm(`Remover "${emp.nome}"?`) && excluir.mutate(emp.id)}
-                      className="px-3 py-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
+                      onClick={() => confirmarExclusao(emp)}
+                      className="px-3 py-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                      title="Excluir permanentemente">
                       <Trash2 className="w-4 h-4"/>
                     </button>
                   </div>
@@ -191,7 +267,7 @@ export default function AdminEmpresas() {
         </div>
       )}
 
-      {/* Modal criar/editar */}
+      {/* Modal */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div className="bg-white rounded-2xl w-full max-w-lg p-6 overflow-y-auto max-h-[90vh] shadow-2xl">
@@ -201,15 +277,13 @@ export default function AdminEmpresas() {
             </div>
 
             <form onSubmit={(e) => { e.preventDefault(); salvar.mutate(form) }} className="space-y-4">
-              {/* Logo */}
               <div>
                 <label className="label">Logo da Associação</label>
                 <div className="flex items-center gap-4">
                   {previewLogo ? (
                     <div className="relative">
                       <img src={previewLogo} alt="" className="w-20 h-20 rounded-xl object-contain bg-gray-50 border border-gray-200 p-1"/>
-                      <button type="button"
-                        onClick={() => { setPreviewLogo(null); setLogo(null) }}
+                      <button type="button" onClick={() => { setPreviewLogo(null); setLogo(null) }}
                         className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs">✕</button>
                     </div>
                   ) : (
@@ -219,10 +293,7 @@ export default function AdminEmpresas() {
                   )}
                   <div>
                     <input type="file" accept="image/*" id="logo-upload" className="hidden"
-                      onChange={e => {
-                        const f = e.target.files[0]
-                        if (f) { setLogo(f); setPreviewLogo(URL.createObjectURL(f)) }
-                      }}/>
+                      onChange={e => { const f = e.target.files[0]; if(f) { setLogo(f); setPreviewLogo(URL.createObjectURL(f)) }}}/>
                     <label htmlFor="logo-upload"
                       className="cursor-pointer inline-flex items-center gap-2 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium px-4 py-2 rounded-xl transition-colors">
                       <Upload className="w-4 h-4"/> {previewLogo ? 'Trocar logo' : 'Enviar logo'}
@@ -240,8 +311,7 @@ export default function AdminEmpresas() {
               <div>
                 <label className="label">Slug (URL) *</label>
                 <input className="input font-mono text-sm" value={form.slug} required
-                  onChange={e => setForm({...form, slug: e.target.value})}
-                  placeholder="ex: agropastoril"/>
+                  onChange={e => setForm({...form, slug: e.target.value})} placeholder="ex: agropastoril"/>
                 <p className="text-xs text-gray-400 mt-1">URL: /empresa/<strong>{form.slug || 'slug'}</strong></p>
               </div>
               <div>

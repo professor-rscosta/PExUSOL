@@ -55,8 +55,20 @@ const atualizar = async (req, res) => {
 };
 
 const excluir = async (req, res) => {
-  await db.query('UPDATE empresas SET ativo=0 WHERE id=?', [req.params.id]);
-  res.json({ mensagem: 'Empresa desativada' });
+  const { id } = req.params;
+  // Verifica se empresa existe
+  const [rows] = await db.query('SELECT * FROM empresas WHERE id=?', [id]);
+  if (!rows[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
+  // Remove em cascata: itens_pedido → pedidos → produtos → empresa
+  const [pedidos] = await db.query('SELECT id FROM pedidos WHERE empresaId=?', [id]);
+  for (const p of pedidos) {
+    await db.query('DELETE FROM itens_pedido WHERE pedidoId=?', [p.id]);
+  }
+  await db.query('DELETE FROM pedidos WHERE empresaId=?', [id]);
+  await db.query('DELETE FROM produtos WHERE empresaId=?', [id]);
+  await db.query('DELETE FROM usuarios WHERE empresaId=?', [id]);
+  await db.query('DELETE FROM empresas WHERE id=?', [id]);
+  res.json({ mensagem: 'Empresa excluída permanentemente' });
 };
 
 const dashboard = async (req, res) => {
