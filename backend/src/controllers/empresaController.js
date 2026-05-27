@@ -33,7 +33,7 @@ const criar = async (req, res) => {
   if (!nome||!slug||!whatsapp) return res.status(400).json({ erro: 'Nome, slug e WhatsApp obrigatórios' });
   const logo = req.file ? `empresas/${req.file.filename}` : null;
   const [r] = await db.query(
-    'INSERT INTO empresas (nome,slug,descricao,whatsapp,site,logo,endereco,cidade) VALUES (?,?,?,?,?,?,?,?)',
+    'INSERT INTO empresas (nome,slug,descricao,whatsapp,site,logo,endereco,cidade,ativo) VALUES (?,?,?,?,?,?,?,?,1)',
     [nome, slug.toLowerCase().replace(/[^a-z0-9-]/g,'-'), descricao||null, whatsapp.replace(/\D/g,''), site||null, logo, endereco||null, cidade||null]
   );
   const [rows] = await db.query('SELECT * FROM empresas WHERE id=?', [r.insertId]);
@@ -72,4 +72,14 @@ const dashboard = async (req, res) => {
   res.json({ pedidosHoje: h.c, pedidosMes: m.c, receitaMes: m.r, produtosAtivos: p.c });
 };
 
-module.exports = { listar, listarAdmin, buscarPorSlug, criar, atualizar, excluir, dashboard };
+
+const toggleAtivo = async (req, res) => {
+  const { id } = req.params;
+  const [rows] = await db.query('SELECT ativo FROM empresas WHERE id=?', [id]);
+  if (!rows[0]) return res.status(404).json({ erro: 'Empresa não encontrada' });
+  const novoAtivo = rows[0].ativo ? 0 : 1;
+  await db.query('UPDATE empresas SET ativo=? WHERE id=?', [novoAtivo, id]);
+  res.json({ ativo: novoAtivo, mensagem: novoAtivo ? 'Empresa ativada' : 'Empresa desativada' });
+};
+
+module.exports = { listar, listarAdmin, buscarPorSlug, criar, atualizar, excluir, dashboard, toggleAtivo };

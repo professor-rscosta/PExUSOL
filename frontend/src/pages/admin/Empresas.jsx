@@ -35,7 +35,13 @@ export default function AdminEmpresas() {
     onError: (err) => toast.error(err.response?.data?.erro || 'Erro ao salvar'),
   })
 
-  const excluir = useMutation({
+  const toggleAtivo = useMutation({
+    mutationFn: (id) => api.patch(`/admin/empresas/${id}/toggle`),
+    onSuccess: () => { qc.invalidateQueries(['admin-empresas']); toast.success('Status atualizado!'); },
+    onError: () => toast.error('Erro ao atualizar status'),
+  });
+
+    const excluir = useMutation({
     mutationFn: (id) => api.delete(`/admin/empresas/${id}`),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-empresas'] }); toast.success('Removida!') },
   })

@@ -30,6 +30,7 @@ router.get('/empresas/:slug', empresaCtrl.buscarPorSlug);
 router.get('/admin/empresas', autenticar, apenasAdmin, empresaCtrl.listarAdmin);
 router.post('/admin/empresas', autenticar, apenasAdmin, upload.single('logo'), empresaCtrl.criar);
 router.put('/admin/empresas/:id', autenticar, apenasAdmin, upload.single('logo'), empresaCtrl.atualizar);
+router.patch('/admin/empresas/:id/toggle', autenticar, apenasAdmin, empresaCtrl.toggleAtivo);
 router.delete('/admin/empresas/:id', autenticar, apenasAdmin, empresaCtrl.excluir);
 
 // Dashboard por empresa (vendedor/admin)

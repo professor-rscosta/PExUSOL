@@ -140,6 +140,9 @@ export const enviarWhatsApp = function(numero, mensagemCodificada) {
 export const getImagemUrl = (imagem) => {
   if (!imagem) return null
   if (imagem.startsWith('http')) return imagem
+  // Remove prefixo /uploads/ duplicado se já vier do banco com path completo
+  if (imagem.startsWith('/uploads/')) return imagem
+  if (imagem.startsWith('uploads/')) return `/${imagem}`
   // logos estáticas ficam em /public/logos/
   if (imagem.startsWith('logos/')) return `/${imagem}`
   // já tem prefixo correto (produtos/ ou empresas/)

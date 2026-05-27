@@ -60,6 +60,8 @@ export default function VendedorProdutos() {
       const fd = new FormData();
       Object.entries(form).forEach(([k,v])=>{ if(k!=='imagem'&&v!==null&&v!==undefined) fd.append(k,v); });
       if (form.imagem) fd.append('imagem', form.imagem);
+      // Garante empresaId no FormData (obrigatório pelo backend)
+      if (!editId) fd.append('empresaId', usuario?.empresa?.id || '');
       return editId ? api.put(`/produtos/${editId}`,fd,{headers:{'Content-Type':'multipart/form-data'}})
                     : api.post('/produtos',fd,{headers:{'Content-Type':'multipart/form-data'}});
     },

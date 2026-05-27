@@ -72,10 +72,22 @@ const atualizarStatus = async (req, res) => {
   const { id } = req.params;
   const [rows] = await db.query('SELECT * FROM pedidos WHERE id=?', [id]);
   if (!rows[0]) return res.status(404).json({ erro: 'Pedido não encontrado' });
-  if (status === 'CANCELADO' && rows[0].status !== 'CANCELADO') {
+  const statusAtual = rows[0].status;
+
+  // Restaura estoque se cancelar
+  if (status === 'CANCELADO' && statusAtual !== 'CANCELADO') {
     const [itens] = await db.query('SELECT * FROM itens_pedido WHERE pedidoId=?', [id]);
     for (const item of itens) await db.query('UPDATE produtos SET estoque=estoque+? WHERE id=?', [item.quantidade, item.produtoId]);
   }
+
+  // Baixa no estoque automatica ao marcar como ENTREGUE
+  if (status === 'ENTREGUE' && statusAtual !== 'ENTREGUE' && statusAtual !== 'CANCELADO') {
+    const [itens] = await db.query('SELECT * FROM itens_pedido WHERE pedidoId=?', [id]);
+    for (const item of itens) {
+      await db.query('UPDATE produtos SET estoque=GREATEST(0, estoque-?) WHERE id=?', [item.quantidade, item.produtoId]);
+    }
+  }
+
   await db.query('UPDATE pedidos SET status=? WHERE id=?', [status, id]);
   res.json({ mensagem: 'Status atualizado', status });
 };
