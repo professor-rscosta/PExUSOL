@@ -101,10 +101,24 @@ export default function Home() {
 
   const { totalItens } = useCarrinho();
 
-  const associacoes = ASSOCIACOES.map((est) => {
-    const apiData = empresasApi?.find((e) => e.slug === est.slug);
-    return { ...est, totalProdutos: apiData?._count?.produtos ?? null };
-  });
+  // Gera lista de associações dinamicamente da API
+  // Usa ASSOCIACOES apenas como fallback visual (cores/emoji) para as 4 originais
+  const associacoes = empresasApi
+    ? empresasApi.map((apiData) => {
+        const est = ASSOCIACOES.find((e) => e.slug === apiData.slug) || {}
+        return {
+          slug: apiData.slug,
+          nome: apiData.nome,
+          descricao: apiData.descricao || est.descricao || '',
+          site: apiData.site || est.site || null,
+          logo: apiData.logo ? `/uploads/${apiData.logo}` : (est.logo || null),
+          cor: est.cor || 'from-blue-700 to-blue-500',
+          emoji: est.emoji || '🏪',
+          totalProdutos: apiData._count?.produtos ?? null,
+          whatsapp: apiData.whatsapp,
+        }
+      })
+    : ASSOCIACOES.map((est) => ({ ...est, totalProdutos: null }));
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden w-full">
@@ -228,9 +242,12 @@ export default function Home() {
             <div key={assoc.slug}
               className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden flex flex-col hover:-translate-y-1 duration-200">
               <div className={`bg-gradient-to-br ${assoc.cor} p-6 flex flex-col items-center gap-3`}>
-                <img src={assoc.logo} alt={assoc.nome}
+                <img
+                  src={assoc.logo || '/logos/usina_sol.jpeg'}
+                  alt={assoc.nome}
                   className="w-24 h-24 rounded-full object-contain bg-white p-1.5 shadow-lg"
-                  onError={(e) => { e.target.style.display = 'none'; }} />
+                  onError={(e) => { e.target.src = '/logos/usina_sol.jpeg'; }}
+                />
               </div>
               <div className="p-5 flex flex-col flex-1">
                 <h3 className="font-bold text-gray-800 text-center leading-snug text-sm mb-2">{assoc.nome}</h3>
