@@ -112,6 +112,18 @@ export default function AdminEmpresas() {
                     )}
                   </div>
                   <div className="flex gap-2 pt-2">
+                    {/* Toggle ativo/inativo */}
+                    <button
+                      onClick={() => toggleAtivo.mutate(emp.id)}
+                      className={`px-2.5 py-2 rounded-xl text-xs font-bold transition-colors border ${
+                        emp.ativo
+                          ? 'bg-green-50 text-green-700 border-green-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
+                          : 'bg-red-50 text-red-600 border-red-200 hover:bg-green-50 hover:text-green-700 hover:border-green-200'
+                      }`}
+                      title={emp.ativo ? 'Clique para desativar' : 'Clique para ativar'}
+                    >
+                      {emp.ativo ? '✅ Ativa' : '❌ Inativa'}
+                    </button>
                     <button onClick={() => abrirEditar(emp)} className="flex-1 btn-secondary text-xs py-2 flex items-center justify-center gap-1.5">
                       <Edit className="w-3.5 h-3.5"/> Editar
                     </button>
